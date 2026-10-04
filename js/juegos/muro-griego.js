@@ -599,6 +599,8 @@
       wait(450).then(() => { cupid.nock = 1; });
       return flyArrow(x1, y1, tx, ty, arc);
     }
+    // Versión abreviada (≈ 11 s en vez de ≈ 18 s): una sola flecha al muro antes de la de Pipo,
+    // abrazo más corto y salida más rápida de todos.
     async function sceneCupid() {
       removePipoArrow();
       showGod(cupid, START_X + 80); Object.assign(cupid, { dy: 0, rot: 0, draw: 0, nock: 1 });
@@ -607,18 +609,15 @@
       const p = warriors[2];
       await pipoToWall(p);
       await turn(p, -1);
-      say(p.x, 104, '¡Dispara!', 1500);
-      await Promise.all([tw(p, { armAng: -110, spearAng: 30, headTilt: 8 }, 220), hop(p, 14, 260).then(() => hop(p, 12, 240))]);
-      await wait(150);
+      say(p.x, 104, '¡Dispara!', 1100);
+      await Promise.all([tw(p, { armAng: -110, spearAng: 30, headTilt: 8 }, 220), hop(p, 14, 260)]);
       await turn(p, 1);
       tw(p, { armAng: 0, spearAng: 0, headTilt: -14, lean: -10, shieldDrop: -10 }, 300); // se agacha, de espaldas a Cupido
-      // Dos flechas al muro: corazones y una grieta
-      let a = await shoot(612, 108);
-      cracksG.appendChild(a); hearts(606, 108, 6); crack(); shake = 4;
-      a = await shoot(612, 146);
-      cracksG.appendChild(a); hearts(606, 146, 6); shake = 4;
-      await wait(300);
-      // La tercera… ¡en el trasero de Pipo!
+      // Una flecha al muro: corazones y una grieta
+      let a = await shoot(612, 128);
+      cracksG.appendChild(a); hearts(606, 128, 6); crack(); shake = 4;
+      await wait(150);
+      // La siguiente… ¡en el trasero de Pipo!
       a = await shoot(p.x + 8, GROUND - p.c.hipY + 4, 10);
       a.remove();
       p.arrow = arrowSVG(p.root);
@@ -627,28 +626,33 @@
       say(p.x, 104, '¡Ay!', 900);
       await Promise.all([hop(p, 42, 480), tw(p, { headTilt: 14, lean: 6, shieldDrop: 0 }, 200)]);
       // Pipo se enamora del muro y lo abraza
-      heartTrail(() => [p.x - 8, GROUND - 168], 2600, 0.14);
+      heartTrail(() => [p.x - 8, GROUND - 168], 1600, 0.14);
       p.gait = SAD; await tw(p, { amp: 0.7 }, 150);
       await moveTo(p, 640, 420);
       tw(p, { amp: 0 }, 150);
-      await tw(p, { lean: -18, headTilt: 14, shieldDrop: 12, shieldRot: 30 }, 500);
-      await wait(800);
-      // Cupido se encoge de hombros y se va volando
-      tween(500, (e, t) => { cupid.rot = Math.sin(t * Math.PI * 3) * 10; });
+      await tw(p, { lean: -18, headTilt: 14, shieldDrop: 12, shieldRot: 30 }, 400);
+      await wait(300);
+      // Cupido se va volando y todos se retiran
       const leave = (async () => {
-        await wait(400); await turnGod(cupid, -1);
-        await tween(1700, (e) => { cupid.x = lerp(830, START_X + 120, e); cupid.dy = lerp(0, -55, e); }, ease.inOutSine);
+        await turnGod(cupid, -1);
+        await tween(1100, (e) => { cupid.x = lerp(830, START_X + 120, e); cupid.dy = lerp(0, -55, e); }, ease.inOutSine);
         hideGod(cupid);
       })();
-      await wait(500);
-      const outs = [0, 1, 3, 4].map((i) => retreat(warriors[i], i));
+      const salir = async (w, demora, ms) => {
+        await wait(demora);
+        await turn(w, -1);
+        w.gait = SAD; tw(w, { amp: 1, lean: -8, headTilt: -10, armAng: -10, spearAng: 42, shieldDrop: 12, shieldRot: 18 }, 300);
+        await moveTo(w, START_X + 80, ms, ease.walk);
+        w.amp = 0;
+      };
+      const outs = [0, 1, 3, 4].map((i, k) => salir(warriors[i], k * 90, 1600 + k * 120));
       const pOut = (async () => { // Pipo se va el último, sin dejar de mirar al muro
-        await wait(1400);
-        await tw(p, { lean: 0, shieldRot: 0 }, 200);
+        await wait(450);
+        await tw(p, { lean: 0, shieldRot: 0 }, 160);
         await turn(p, -1);
-        p.gait = SAD; tw(p, { amp: 1, look: -1, headTilt: 10, shieldDrop: 8 }, 300);
-        heartTrail(() => [p.x, GROUND - 168], 2600, 0.2);
-        await moveTo(p, START_X + 80, 2900, ease.walk);
+        p.gait = SAD; tw(p, { amp: 1, look: -1, headTilt: 10, shieldDrop: 8 }, 250);
+        heartTrail(() => [p.x, GROUND - 168], 1600, 0.2);
+        await moveTo(p, START_X + 80, 1800, ease.walk);
         p.amp = 0; p.look = 1;
       })();
       await Promise.all([leave, pOut, ...outs]);

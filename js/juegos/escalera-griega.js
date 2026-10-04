@@ -1,6 +1,6 @@
 // Escalera griega: la misma mecánica de js/juegos/escalera.js (cada repetición de la oración
-// materializa un nivel), con bloques de piedra sobre terracota y los cinco hoplitas en
-// formación: siguen el frente de lectura, se sientan en el borde, saltan uno tras otro y
+// materializa un nivel), con bloques de piedra sobre terracota y tres de los hoplitas en
+// formación (tres de ellos): siguen el frente de lectura, se sientan en el borde, saltan uno tras otro y
 // celebran al final. Necesita js/juegos/griego-base.js.
 //
 //   const e = EscaleraGriega.crear(svg, palabras, bloques)   (misma firma que Escalera)
@@ -18,7 +18,8 @@
   const HUECO = 6;
   const ARRIBA = 165;
   const ABAJO = 482;
-  const SEPARACION = 16;   // distancia entre hoplitas en la formación
+  const SEPARACION = 20;   // distancia entre hoplitas en la formación
+  const FORMACION = [0, 2, 4]; // Leandro (el capitán), Pipo (el pequeño) y Dimas (el grandote)
   const ALTURA_HOPLITA = 150; // alto aproximado de un hoplita a escala 1 (con casco)
   let contador = 0;
 
@@ -80,16 +81,18 @@
     const formacion = svg.querySelector('.formacion');
     const fxG = svg.querySelector('.fx');
 
-    // ---------- Los cinco hoplitas (el capitán adelante) ----------
+    // ---------- Tres hoplitas en formación (el capitán adelante) ----------
+    // `orden` es el puesto en la fila: 0 = adelante
     const inicioX = IZQ - HUECO - 12;
     const hoplitas = [];
-    for (let i = CHARS.length - 1; i >= 0; i--) {
-      const w = buildWarrior(CHARS[i], i, formacion, inicioX - i * SEPARACION);
+    for (let k = FORMACION.length - 1; k >= 0; k--) {
+      const i = FORMACION[k];
+      const w = buildWarrior(CHARS[i], i, formacion, inicioX - k * SEPARACION);
       Object.assign(w, {
-        gait: MARCH, facing: -1, escala, suelo: topeFila(1), fila: 1, modo: 'parado', salto: null,
-        espera: null, sentado: 0, cuclillas: i > 0, armAng: -6, spearAng: 2,
+        orden: k, gait: MARCH, facing: -1, escala, suelo: topeFila(1), fila: 1, modo: 'parado', salto: null,
+        espera: null, sentado: 0, cuclillas: k > 0, armAng: -6, spearAng: 2,
       });
-      hoplitas[i] = w;
+      hoplitas[k] = w;
     }
 
     // ---------- Estado de la lectura ----------
@@ -123,7 +126,7 @@
     }
 
     function actualizarHoplita(w, dt) {
-      const o = w.idx * SEPARACION;
+      const o = w.orden * SEPARACION;
       if (w.salto) {
         const s = w.salto;
         s.t = Math.min(1, s.t + dt / 0.55);
@@ -138,7 +141,7 @@
       if (w.fila < paso) {
         const borde = finFila(w.fila) - 3 - o;
         if (w.fila === paso - 1 && revelado > finFila(paso - 1) + 24) {
-          if (w.espera === null) w.espera = w.idx * 0.22;
+          if (w.espera === null) w.espera = w.orden * 0.22;
           w.espera -= dt;
           if (w.espera <= 0) {
             w.espera = null;
@@ -157,7 +160,7 @@
       if (completo && w.modo !== 'caminando') {
         if (paso < n) w.modo = 'sentado';
         else if (fase === 'fin') {
-          if (w.modo !== 'celebrando' && w.idx === 0) lanzarEstrellas(w.x, w.suelo - 70);
+          if (w.modo !== 'celebrando' && w.orden === 0) lanzarEstrellas(w.x, w.suelo - 70);
           w.modo = 'celebrando';
         }
       }
@@ -169,8 +172,8 @@
       w.sentado += ((sentado ? 1 : 0) - w.sentado) * Math.min(1, dt * 8);
       w.amp += ((w.modo === 'caminando' ? 1 : 0) - w.amp) * Math.min(1, dt * 10);
       if (w.modo === 'celebrando') {
-        const fase = reloj * (5 + w.idx * 0.6) + w.idx;
-        w.jump = Math.abs(Math.sin(fase)) * (14 + w.idx * 3) * w.escala * 2;
+        const fase = reloj * (5 + w.orden * 0.6) + w.orden;
+        w.jump = Math.abs(Math.sin(fase)) * (14 + w.orden * 3) * w.escala * 2;
         w.armAng = -150; w.spearAng = 145; w.headTilt = 10;
       } else if (w.modo === 'saltando') {
         w.jump = 0; w.armAng = -60; w.spearAng = 40; w.headTilt = 6;
