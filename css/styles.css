@@ -162,6 +162,40 @@ main {
 .cuento .p.escuchando.dicha { color: #cfcfcf; }
 .cuento .p.escuchando.actual { color: #fff; background: none; box-shadow: inset 0 -3px 0 #fff; }
 
+/* ---------- Juegos del cuento: muro (Practicar) y escalera (Frases) ---------- */
+.juego { text-align: center; }
+.juego svg { display: block; width: 100%; }
+.juego-muro svg { max-height: 32vh; margin: 8px auto 12px; }
+.juego-escalera svg { height: min(36vh, 360px); margin: 4px auto 6px; }
+.juego .parrafo { margin-top: 8px; font-size: clamp(24px, 3.2vw, 36px); line-height: 1.7; }
+.juego .suelo { stroke: #2a2a2a; stroke-width: 2; }
+.juego .pilar { stroke: #333; stroke-width: 1.5; }
+.juego .bloque-svg { stroke: #9a9a9a; stroke-width: 1.5; }
+.juego .fantasma rect { fill: none; stroke: #3a3a3a; stroke-width: 1.5; stroke-dasharray: 6 7; }
+.juego .frente { stroke: #fff; stroke-linecap: round; }
+.juego .pj polyline, .juego .pj circle, .juego .pj path, .juego .pj rect {
+  fill: none; stroke: #f2f2f2; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round;
+}
+.juego .pj circle, .juego .pj rect { fill: #000; }
+.juego .pj .visor { stroke-width: 1.8; stroke: #bdbdbd; }
+.juego .ladrillo rect { stroke: #a8a8a8; stroke-width: 1.5; }
+.juego .ladrillo:not(.liso) rect { fill: #000; }
+.juego .ladrillo.liso rect { stroke: #6a6a6a; }
+.juego .ladrillo text { fill: #e6e6e6; font-family: 'Lexend', sans-serif; font-size: 24px; text-anchor: middle; }
+.juego .grieta {
+  fill: none; stroke: #d8d8d8; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round;
+  stroke-dasharray: 1 1; stroke-dashoffset: 1; transition: stroke-dashoffset .28s ease-out;
+}
+.juego .grieta.on { stroke-dashoffset: 0; }
+.juego .golpe { fill: none; stroke: #555; stroke-width: 1.5; transition: fill .3s, stroke .3s; }
+.juego .golpe.hecho { fill: #e6e6e6; stroke: #e6e6e6; }
+.oracion-juego { color: #6e6e6e; }
+.oracion-juego .objetivo { color: #fff; box-shadow: inset 0 -3px 0 #fff; }
+.oracion-juego .lograda { color: #fff; font-weight: 600; animation: brillo 1.2s ease; }
+@keyframes brillo { 30% { text-shadow: 0 0 18px rgba(255, 255, 255, .7); } }
+.opcion { display: inline-flex; align-items: center; gap: 10px; margin-top: 28px; font-size: 16px; font-weight: 300; color: #8d8d8d; }
+.opcion input { width: 20px; height: 20px; accent-color: #bdbdbd; }
+
 /* ---------- Etapa 2: práctica ---------- */
 .practica { text-align: center; }
 .progreso {

@@ -569,11 +569,11 @@
     for (let k = 0; k < conocidos.length - 1; k++) {
       const [a, ta] = conocidos[k];
       const [b, tb] = conocidos[k + 1];
-      const tramo = pesos.slice(a + 1, b).reduce((s, x) => s + x, 0) + 1;
-      let acum = 0;
+      const tramo = pesos.slice(Math.max(a, 0), b).reduce((s, x) => s + x, 0);
+      let acum = a < 0 ? 0 : pesos[a];
       for (let i = a + 1; i < b; i++) {
-        acum += i === a + 1 ? 0.5 : pesos[i - 1];
         t[i] = ta + ((tb - ta) * acum) / tramo;
+        acum += pesos[i];
       }
     }
     return t;

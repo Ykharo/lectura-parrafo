@@ -182,5 +182,6 @@
     audio: 'assets/audio/astronauta.wav',
     tiempos: 'assets/audio/astronauta.json',
     escenas: [escena1, escena2, escena3, escena4, escena5],
+    juegos: { muro: true, escalera: true }, // Practicar con el muro, Frases con la escalera
   };
 })();

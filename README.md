@@ -10,7 +10,13 @@ Aplicación web para practicar lectura en voz alta (español de Chile, nivel ~9 
 3. **Frases**: cada oración se arma de a un bloque con sentido (`[A]`, `[A / B]`, `[A / B / C]`…) y se lee en voz alta en cada paso, hasta leerla completa. Los bloques se calculan solos (puntuación y palabras como *y, que, con, entre…*) o se marcan a mano escribiendo ` / ` en el texto.
 4. **Leer**: el párrafo completo; cada palabra se pinta verde al leerla (naranja si se saltó). Al final: tiempo, palabras por minuto y palabras para repasar.
 
-**Cuentos animados** (por ahora, «El astronauta curioso»): en la etapa Leer el texto se lee **una oración (escena) a la vez**. Al terminar cada oración, la escena se dibuja en líneas al ritmo de la voz adulta grabada; luego «Siguiente escena» o «Ver otra vez». Las escenas están en `js/cuentos/<id>.js` (motor común en `js/cuento.js`) y se activan con `cuento: '<id>'` en `js/textos.js`.
+**Cuentos animados** (por ahora, «El astronauta curioso»), activados con `cuento: '<id>'` en `js/textos.js`:
+- **Practicar → muro de palabras**: las 5 palabras más difíciles; cada una es un muro de ladrillos-sílaba que el astronauta rompe en 3 lecturas. «🔊 Escuchar» usa la voz adulta grabada.
+- **Frases → escalera**: cada repetición de la oración materializa un nivel; el astronauta lo recorre al ritmo de la lectura y celebra al final.
+- **Leer → escenas**: una oración a la vez; al terminarla, la escena se dibuja al ritmo de la voz adulta. Si está activado «Grabar mi voz», también se puede ver la escena con **su propia voz** («🎙 Escuchar mi lectura»).
+- **Resultados → «▶ Ver el cuento completo»**: las 5 escenas seguidas con la voz adulta.
+
+Archivos: `js/cuentos/<id>.js` (escenas), `js/cuento.js` (motor de animación), `js/juegos/muro.js` y `js/juegos/escalera.js`, `js/cuento-app.js` (las etapas especiales).
 
 El **historial** guarda cada lectura en el iPad. Desde ahí se puede exportar o importar un respaldo (`.json`).
 
