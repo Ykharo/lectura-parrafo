@@ -10,6 +10,8 @@ Aplicación web para practicar lectura en voz alta (español de Chile, nivel ~9 
 3. **Frases**: cada oración se arma de a un bloque con sentido (`[A]`, `[A / B]`, `[A / B / C]`…) y se lee en voz alta en cada paso, hasta leerla completa. Los bloques se calculan solos (puntuación y palabras como *y, que, con, entre…*) o se marcan a mano escribiendo ` / ` en el texto.
 4. **Leer**: el párrafo completo; cada palabra se pinta verde al leerla (naranja si se saltó). Al final: tiempo, palabras por minuto y palabras para repasar.
 
+**Cuentos animados** (por ahora, «El astronauta curioso»): en la etapa Leer el texto se lee **una oración (escena) a la vez**. Al terminar cada oración, la escena se dibuja en líneas al ritmo de la voz adulta grabada; luego «Siguiente escena» o «Ver otra vez». Las escenas están en `js/cuentos/<id>.js` (motor común en `js/cuento.js`) y se activan con `cuento: '<id>'` en `js/textos.js`.
+
 El **historial** guarda cada lectura en el iPad. Desde ahí se puede exportar o importar un respaldo (`.json`).
 
 ## Estructura

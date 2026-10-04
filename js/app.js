@@ -47,7 +47,28 @@ function cargarTexto(t) {
   esperadas = palabras.map((p) => p.norm);
   oracionesTexto = oraciones(palabras);
   dificiles = new Set(Almacen.dificiles(t.id) || dificilesAutomaticas(palabras));
+
+  // Cuento animado: tiempos de cada palabra en la grabación adulta
+  tiemposCuento = null;
+  const def = cuentoDe(t);
+  if (def) {
+    fetch(def.tiempos)
+      .then((r) => r.json())
+      .then((j) => {
+        if (texto === t && j.palabras.length === palabras.length) {
+          tiemposCuento = { inicios: j.palabras.map((p) => p.inicio), duracion: j.duracion };
+        }
+      })
+      .catch(() => { /* sin grabación: la animación sigue un ritmo estimado */ });
+  }
 }
+
+// Escenas animadas del texto, si las tiene (una por oración)
+function cuentoDe(t) {
+  const def = t && t.cuento && window.CUENTOS && window.CUENTOS[t.cuento];
+  return def && def.escenas.length === oraciones(analizarParrafo(t.parrafo)).length ? def : null;
+}
+let tiemposCuento = null;   // { inicios: [segundos por palabra], duracion }
 
 function todosLosTextos() {
   return [...window.TEXTOS, ...Almacen.textosPropios().map((t) => ({ ...t, propio: true }))];
@@ -76,6 +97,10 @@ function pantalla(clase, html, botones = []) {
   void $vista.offsetWidth;
   $vista.style.animation = '';
   window.scrollTo(0, 0);
+  ponerBotones(botones);
+}
+
+function ponerBotones(botones) {
   $acciones.innerHTML = '';
   for (const b of botones) {
     const el = document.createElement('button');
@@ -206,6 +231,7 @@ const escucha = {
 // ================= Inicio: elegir texto =================
 function inicio() {
   escucha.detener();
+  detenerCuento();
   ocultarAviso();
   marcarPaso(0);
   const textos = todosLosTextos();
@@ -291,6 +317,7 @@ function agregarTexto() {
 // ================= Historial =================
 function historial() {
   escucha.detener();
+  detenerCuento();
   ocultarAviso();
   marcarPaso(0);
   const lecturas = Almacen.historial().slice().reverse(); // más recientes primero
@@ -355,6 +382,7 @@ function exportarRespaldo() {
 // ================= Etapa 1: mirar el párrafo =================
 function etapa1() {
   escucha.detener();
+  detenerCuento();
   ocultarAviso();
   marcarPaso(1);
   practica = null;
@@ -572,10 +600,19 @@ function siguientePasoFrase() {
 function antesDeLeer() {
   escucha.detener();
   marcarPaso(4);
+  const animado = cuentoDe(texto);
   pantalla('centro', `
     <p class="grande">¡Muy bien!</p>
-    <p class="sub">Ahora lee el párrafo completo en voz alta.</p>
-  `, [{ texto: 'Comenzar lectura', primario: true, accion: etapaLectura }]);
+    <p class="sub">${animado
+      ? 'Ahora lee el cuento, una escena a la vez. Al terminar cada oración, se dibuja la escena.'
+      : 'Ahora lee el párrafo completo en voz alta.'}</p>
+  `, [{ texto: 'Comenzar lectura', primario: true, accion: comenzarLectura }]);
+}
+
+// Los textos con cuento animado se leen por escenas; los demás, de corrido.
+function comenzarLectura() {
+  if (cuentoDe(texto)) etapaCuento();
+  else etapaLectura();
 }
 
 // ================= Etapa 4: lectura completa =================
@@ -621,17 +658,177 @@ function terminarLectura() {
   lectura.terminada = true;
   lectura.t1 = performance.now();
   escucha.detener();
-  setTimeout(resultados, 800);
+  const segundos = lectura.t0 ? Math.round((lectura.t1 - lectura.t0) / 1000) : 0;
+  setTimeout(() => resultados({ estados: lectura.estados, segundos }), 800);
 }
 
-function resultados() {
-  const leidas = lectura.estados.filter((e) => e === 'leida').length;
-  const segundos = lectura.t0 ? Math.round((lectura.t1 - lectura.t0) / 1000) : 0;
+// ================= Etapa 4 en cuentos animados: lectura por escenas =================
+// La niña lee una oración; al terminarla, la escena se dibuja al ritmo de la voz adulta grabada.
+const audioCuento = new Audio();
+audioCuento.preload = 'auto';
+let cuento = null;
+
+function etapaCuento() {
+  ocultarAviso();
+  marcarPaso(4);
+  const def = cuentoDe(texto);
+  cuento = { def, escena: 0, estados: palabras.map(() => 'pendiente'), ms: 0, reproduccion: 0 };
+  // En iOS el audio debe sonar por primera vez dentro de un toque: se "desbloquea" en silencio.
+  const url = new URL(def.audio, location.href).href;
+  if (audioCuento.src !== url) audioCuento.src = url;
+  audioCuento.muted = true;
+  audioCuento.play()
+    .then(() => { audioCuento.pause(); audioCuento.muted = false; })
+    .catch(() => { audioCuento.muted = false; });
+  leerEscena();
+}
+
+function detenerCuento() {
+  if (cuento) cuento.reproduccion++;
+  audioCuento.pause();
+}
+
+function leerEscena() {
+  const k = cuento.escena;
+  const o = oracionesTexto[k];
+  const ps = palabras.slice(o.inicio, o.fin).map((p) => `<span class="p" data-i="${p.i}">${escapar(p.bruta)}</span>`).join(' ');
+  pantalla('lectura cuento', `
+    <p class="progreso">Escena ${k + 1} de ${oracionesTexto.length}</p>
+    <div class="escena-cuento">
+      <svg viewBox="0 0 1000 520" preserveAspectRatio="xMidYMid meet" aria-hidden="true">${cuento.def.escenas[k]}</svg>
+    </div>
+    <p class="parrafo">${ps}</p>
+    <div class="mensaje">${Reconocedor ? 'Lee la oración en voz alta' : 'Lee la oración y toca «Terminé»'}</div>
+  `, [{ texto: 'Terminé', accion: terminarEscena }]);
+  cuento.ctrl = Cuento.controlador($vista.querySelector('svg'));
+  Object.assign(cuento, { o, base: cuento.estados.slice(), desde: o.inicio, pos: o.inicio, consumidas: 0, t0: null, leyendo: true });
+  escucha.alReiniciar = () => {
+    cuento.base = cuento.estados.slice();
+    cuento.desde = cuento.pos;
+    cuento.consumidas = 0;
+  };
+  escucha.alOir = oirEscena;
+  escucha.iniciar();
+  pintarEscena();
+}
+
+function oirEscena(t) {
+  if (!cuento.leyendo) return;
+  if (cuento.consumidas > t.length) cuento.consumidas = t.length;
+  const r = alinear(esperadas.slice(0, cuento.o.fin), t.slice(cuento.consumidas), cuento.desde, cuento.base);
+  if (r.pos > cuento.o.inicio && !cuento.t0) cuento.t0 = performance.now();
+  cuento.pos = r.pos;
+  cuento.estados = r.estados;
+  pintarEscena();
+  if (cuento.pos >= cuento.o.fin) terminarEscena();
+}
+
+function pintarEscena() {
+  $vista.querySelectorAll('.parrafo .p').forEach((el) => {
+    const i = Number(el.dataset.i);
+    el.className = `p ${cuento.estados[i]}${cuento.leyendo && i === cuento.pos ? ' actual' : ''}`;
+  });
+}
+
+function terminarEscena() {
+  if (!cuento.leyendo) return;
+  cuento.leyendo = false;
+  if (cuento.t0) cuento.ms += performance.now() - cuento.t0;
+  escucha.detener(); // el micrófono se apaga para que la voz grabada suene bien y no se cuente como lectura
+  pintarEscena();
+  ponerBotones([]);
+  $vista.querySelector('.mensaje').textContent = '';
+  const k = cuento.escena;
+  setTimeout(() => { if (cuento && cuento.escena === k) reproducirEscena(); }, 700);
+}
+
+// Dibuja la escena al ritmo de la voz adulta (o de un ritmo estimado si no hay grabación)
+function reproducirEscena() {
+  const { o, ctrl } = cuento;
+  const id = ++cuento.reproduccion;
+  const spans = [...$vista.querySelectorAll('.parrafo .p')];
+  const n = o.fin - o.inicio;
+  let dicha = -1;
+  const marcar = (rel) => {
+    if (rel <= dicha) return;
+    dicha = rel;
+    ctrl.hasta(rel);
+    spans.forEach((el, q) => {
+      el.classList.toggle('dicha', q < rel);
+      el.classList.toggle('actual', q === rel);
+    });
+  };
+  const fin = () => {
+    if (id !== cuento.reproduccion) return;
+    marcar(n - 1);
+    spans.forEach((el) => { el.classList.remove('actual'); el.classList.add('dicha'); });
+    ctrl.final();
+    const ultima = cuento.escena >= oracionesTexto.length - 1;
+    ponerBotones([
+      { texto: '↺ Ver otra vez', accion: reproducirEscena },
+      { texto: ultima ? 'Ver resultados' : 'Siguiente escena →', primario: true, accion: siguienteEscena },
+    ]);
+  };
+
+  // Sin grabación (o si no logra sonar): ritmo estimado por sílabas
+  const ritmoEstimado = (desdePalabra) => {
+    let ms = 400;
+    for (let q = desdePalabra; q < n; q++) {
+      const p = palabras[o.inicio + q];
+      setTimeout(() => { if (id === cuento.reproduccion) marcar(q); }, ms);
+      ms += p.silabas.length * 220 + (/[,;:]$/.test(p.bruta) ? 350 : 60);
+    }
+    setTimeout(fin, ms + 300);
+  };
+
+  ctrl.reiniciar();
+  ctrl.hasta(-1);
+  spans.forEach((el) => { el.className = 'p escuchando'; });
+  ponerBotones([]);
+
+  if (!tiemposCuento) return ritmoEstimado(0);
+
+  const ini = tiemposCuento.inicios;
+  const desde = Math.max(0, ini[o.inicio] - 0.15);
+  const hastaT = o.fin < ini.length ? ini[o.fin] - 0.3 : tiemposCuento.duracion;
+  audioCuento.currentTime = desde;
+  audioCuento.play().catch(() => { /* lo resuelve el control de abajo */ });
+  const comienzo = performance.now();
+  const tic = () => {
+    if (id !== cuento.reproduccion) return;
+    const t = audioCuento.currentTime;
+    // si el audio no avanza (bloqueado o sin sonido), se sigue sin él
+    if (performance.now() - comienzo > 1500 && t < desde + 0.05) {
+      audioCuento.pause();
+      return ritmoEstimado(dicha + 1);
+    }
+    let rel = dicha;
+    while (rel + 1 < n && ini[o.inicio + rel + 1] <= t) rel++;
+    marcar(rel);
+    if (t >= hastaT || audioCuento.ended) {
+      audioCuento.pause();
+      setTimeout(fin, 300);
+      return;
+    }
+    requestAnimationFrame(tic);
+  };
+  requestAnimationFrame(tic);
+}
+
+function siguienteEscena() {
+  detenerCuento();
+  cuento.escena++;
+  if (cuento.escena < oracionesTexto.length) return leerEscena();
+  resultados({ estados: cuento.estados, segundos: Math.round(cuento.ms / 1000) });
+}
+
+function resultados({ estados, segundos }) {
+  const leidas = estados.filter((e) => e === 'leida').length;
   const ppm = segundos ? Math.round(leidas / (segundos / 60)) : 0;
   const tiempo = `${Math.floor(segundos / 60)}:${String(segundos % 60).padStart(2, '0')}`;
 
   const repasar = [...new Set([
-    ...palabras.filter((p, i) => lectura.estados[i] === 'saltada').map((p) => p.limpia),
+    ...palabras.filter((p, i) => estados[i] === 'saltada').map((p) => p.limpia),
     ...(practica ? practica.saltadas : []),
   ])];
 
@@ -658,7 +855,7 @@ function resultados() {
     ${repasar.length ? `<div class="repasar"><p>Para repasar</p>${repasar.map((w) => `<span class="chip">${escapar(w)}</span>`).join('')}</div>` : ''}
   `, [
     { texto: 'Otro texto', accion: inicio },
-    { texto: 'Leer otra vez', primario: true, accion: etapaLectura },
+    { texto: 'Leer otra vez', primario: true, accion: comenzarLectura },
   ]);
 }
 

@@ -118,6 +118,50 @@ main {
 @keyframes aparecer { from { opacity: 0; filter: blur(4px); } }
 .corte { margin: 0 .35em; font-weight: 300; color: #3a3a3a; }
 
+/* ---------- Etapa 4 en cuentos animados: lectura por escenas ---------- */
+.cuento { text-align: center; }
+.cuento .parrafo { font-size: clamp(24px, 3.2vw, 36px); line-height: 1.7; }
+.escena-cuento svg { display: block; width: 100%; height: min(46vh, 440px); margin: 4px auto 6px; }
+.escena-cuento .trazo {
+  fill: none;
+  stroke: #d4d4d4;
+  stroke-width: var(--g, 2);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset .9s ease;
+}
+.escena-cuento .trazo.on { stroke-dashoffset: 0; }
+.escena-cuento .trazo.tenue { stroke: #6a6a6a; stroke-width: calc(var(--g, 2) * .75); }
+.escena-cuento .trazo.fino { stroke: #9a9a9a; stroke-width: calc(var(--g, 2) * .75); }
+.escena-cuento .cuerpo { fill: #000; }
+.escena-cuento .aparece { opacity: 0; transition: opacity .8s ease; }
+.escena-cuento .aparece.on { opacity: 1; }
+.escena-cuento .fantasma { fill: none; stroke: #5a5a5a; stroke-width: 1.2; stroke-dasharray: 3 5; }
+.escena-cuento .fantasma.on { opacity: .8; }
+.escena-cuento .off { opacity: 0 !important; }
+.escena-cuento .rotulo {
+  fill: #8f8f8f;
+  font-family: 'Lexend', sans-serif;
+  font-size: 14px;
+  font-weight: 300;
+  letter-spacing: .14em;
+  text-anchor: middle;
+  text-transform: uppercase;
+}
+.escena-cuento .zeta { fill: #8f8f8f; font-family: 'Lexend', sans-serif; font-size: 15px; font-weight: 300; }
+.escena-cuento .estrella, .escena-cuento .puntero { fill: #8a8a8a; }
+.escena-cuento .sin-trans, .escena-cuento .sin-trans * { transition: none !important; }
+.escena-cuento .final .flota { animation: cuento-flotar 4.5s ease-in-out infinite; animation-delay: var(--f, 0s); transform-box: fill-box; }
+.escena-cuento .final .estrella { animation: cuento-titilar 3s ease-in-out infinite; animation-delay: var(--f, 0s); }
+@keyframes cuento-flotar { 50% { transform: translateY(-5px); } }
+@keyframes cuento-titilar { 50% { opacity: .25; } }
+/* mientras suena la voz adulta: karaoke en grises */
+.cuento .p.escuchando { color: #6e6e6e; }
+.cuento .p.escuchando.dicha { color: #cfcfcf; }
+.cuento .p.escuchando.actual { color: #fff; background: none; box-shadow: inset 0 -3px 0 #fff; }
+
 /* ---------- Etapa 2: práctica ---------- */
 .practica { text-align: center; }
 .progreso {

@@ -2,6 +2,7 @@
 // Para sumar uno aquí: copia un bloque y usa un `id` nuevo (sin espacios ni tildes).
 // Opcional: marca con " / " los bloques con sentido para la etapa «Frases». Si un texto no
 // tiene ninguna marca, los bloques se calculan solos (puntuación y palabras como y, que, con…).
+// Opcional: `cuento` enlaza escenas animadas (una por oración) que se ven al leer cada oración.
 window.TEXTOS = [
   {
     id: 'tortuga',
@@ -51,6 +52,7 @@ window.TEXTOS = [
   {
     id: 'astronauta',
     titulo: 'El astronauta curioso',
+    cuento: 'astronauta', // escenas animadas en js/cuentos/astronauta.js
     parrafo:
       'Lucas sueña con ser astronauta. Todas las noches mira las estrellas con su telescopio desde la ' +
       'ventana de su habitación. Ya conoce el nombre de varios planetas: Mercurio, Venus, Marte y Júpiter. ' +
