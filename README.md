@@ -19,6 +19,12 @@ Si el micrófono no capta una palabra en el muro, un adulto puede tocar la escen
 
 Archivos: `js/cuentos/<id>.js` (escenas), `js/cuento.js` (motor de animación), `js/juegos/muro.js` y `js/juegos/escalera.js`, `js/cuento-app.js` (las etapas especiales).
 
+**«El rey Midas»** usa el mismo esquema con **estilo de jarrón griego** (cerámica de figuras negras sobre terracota, tomado de `Antecedentes/`):
+- 9 oraciones agrupadas en **5 escenas** (`grupos` en `js/cuentos/midas.js`).
+- Muro: los **cinco hoplitas** embisten un muro de piedra junto a la palabra; en la **última palabra de cada escena** llegan los dioses (Cupido, Medusa y Zeus). Estilo y tiempos sin cambios respecto de los prototipos (`js/juegos/griego-base.js`, `js/juegos/muro-griego.js`).
+- Escalera: bloques de piedra y los cinco hoplitas en formación, que se sientan y saltan cada nivel (`js/juegos/escalera-griega.js`).
+- Escenas: figuras negras con incisiones crema; el oro se enciende al nombrarse (flores, silla, piedras, pan, uvas) y desaparece de las manos al lavarse en el río.
+
 El **historial** guarda cada lectura en el iPad. Desde ahí se puede exportar o importar un respaldo (`.json`).
 
 ## Estructura

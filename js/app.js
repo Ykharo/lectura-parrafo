@@ -45,13 +45,13 @@ function cargarTexto(t) {
   texto = t;
   palabras = analizarParrafo(t.parrafo);
   esperadas = palabras.map((p) => p.norm);
-  oracionesTexto = oraciones(palabras);
+  const def = cuentoDe(t);
+  oracionesTexto = agruparOraciones(oraciones(palabras), def); // en los cuentos: una entrada por escena
   const automaticas = juegosDe(t).muro ? dificilesPorEscena(palabras, oracionesTexto) : dificilesAutomaticas(palabras);
   dificiles = new Set(Almacen.dificiles(t.id) || automaticas);
 
   // Cuento animado: tiempos de cada palabra en la grabación adulta
   tiemposCuento = null;
-  const def = cuentoDe(t);
   if (def) {
     prepararAudioCuento(def);
     fetch(def.tiempos)
@@ -65,10 +65,29 @@ function cargarTexto(t) {
   }
 }
 
-// Escenas animadas del texto, si las tiene (una por oración)
+// Escenas animadas del texto, si las tiene: una por oración, o por grupo de oraciones (def.grupos)
 function cuentoDe(t) {
   const def = t && t.cuento && window.CUENTOS && window.CUENTOS[t.cuento];
-  return def && def.escenas.length === oraciones(analizarParrafo(t.parrafo)).length ? def : null;
+  if (!def) return null;
+  const total = oraciones(analizarParrafo(t.parrafo)).length;
+  if (def.grupos) {
+    const ultimo = def.grupos[def.grupos.length - 1];
+    return def.escenas.length === def.grupos.length && ultimo[ultimo.length - 1] === total - 1 ? def : null;
+  }
+  return def.escenas.length === total ? def : null;
+}
+
+// Junta oraciones consecutivas en escenas según def.grupos (sus bloques se concatenan)
+function agruparOraciones(ors, def) {
+  if (!def || !def.grupos) return ors;
+  return def.grupos.map((grupo) => {
+    const partes = grupo.map((k) => ors[k]);
+    return {
+      inicio: partes[0].inicio,
+      fin: partes[partes.length - 1].fin,
+      bloques: partes.reduce((todos, o) => todos.concat(o.bloques), []),
+    };
+  });
 }
 let tiemposCuento = null;   // { inicios: [segundos por palabra], duracion }
 

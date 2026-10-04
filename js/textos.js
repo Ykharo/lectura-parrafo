@@ -2,7 +2,7 @@
 // Para sumar uno aquí: copia un bloque y usa un `id` nuevo (sin espacios ni tildes).
 // Opcional: marca con " / " los bloques con sentido para la etapa «Frases». Si un texto no
 // tiene ninguna marca, los bloques se calculan solos (puntuación y palabras como y, que, con…).
-// Opcional: `cuento` enlaza escenas animadas (una por oración) que se ven al leer cada oración.
+// Opcional: `cuento` enlaza escenas animadas (js/cuentos/<id>.js): una por oración o por grupo de oraciones.
 window.TEXTOS = [
   {
     id: 'tortuga',
@@ -14,13 +14,16 @@ window.TEXTOS = [
       'y le llevaba hojas frescas de lechuga.',
   },
   {
-    id: 'volantin',
-    titulo: 'El volantín de Tomás',
+    id: 'midas',
+    titulo: 'El rey Midas',
+    cuento: 'midas', // escenas en estilo jarrón griego en js/cuentos/midas.js
     parrafo:
-      'El domingo amaneció con mucho viento y Tomás decidió elevar su volantín rojo en el cerro. ' +
-      'Su abuelo le enseñó a soltar el hilo poco a poco, sin apurarse. De repente, el volantín subió ' +
-      'tan alto que parecía tocar las nubes. Los niños del barrio aplaudieron emocionados. Al atardecer, ' +
-      'Tomás guardó su volantín y prometió volver el próximo domingo con su abuelo.',
+      'El rey Midas amaba el oro más que nada en el mundo. Un día, el dios Dioniso le concedió un deseo muy especial. ' +
+      'Midas pidió que todo lo que tocara se convirtiera en oro brillante. Al principio estaba feliz y tocó las flores, ' +
+      'las sillas y las piedras del jardín. Pero cuando quiso comer, el pan y las uvas también se volvieron de oro. ' +
+      'Tenía mucha hambre y mucha sed, y comenzó a llorar. Entonces le rogó a Dioniso que le quitara ese poder. ' +
+      'El dios le dijo que se lavara en el río, y así lo hizo. Desde ese día, Midas prefirió una mesa con comida ' +
+      'antes que un palacio de oro.',
   },
   {
     id: 'ballena',

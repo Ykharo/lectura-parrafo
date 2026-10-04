@@ -203,6 +203,29 @@ main {
 .oracion-juego .lograda { color: #fff; font-weight: 600; animation: brillo 1.2s ease; }
 @keyframes brillo { 30% { text-shadow: 0 0 18px rgba(255, 255, 255, .7); } }
 
+/* ---------- Estilo griego (El rey Midas): cerámica de figuras negras sobre terracota ---------- */
+.griego svg { border-radius: 6px; box-shadow: 0 0 0 3px #1E1410, 0 0 0 4px #3a2a1f; }
+.griego.juego-muro svg { max-height: 30vh; }
+/* el marco se ajusta al dibujo (sin franjas a los lados) */
+.griego.juego-escalera svg, .escena-griega svg { width: auto; max-width: 100%; margin-left: auto; margin-right: auto; }
+.griego .crack {
+  fill: none; stroke: #1E1410; stroke-width: 3.5; stroke-linejoin: round; stroke-linecap: round;
+  transition: stroke-dashoffset .28s ease-out, opacity .4s;
+}
+/* la palabra de la banda late mientras espera la lectura */
+.griego svg.esperando .palabra-banda { animation: latido-griego 1.1s ease-in-out infinite; }
+@keyframes latido-griego { 0%, 100% { fill: #1E1410; } 50% { fill: #FFF3D6; } }
+.griego .fantasma rect { fill: none; stroke: #1E1410; stroke-width: 2; stroke-dasharray: 7 7; }
+/* escenas de jarrón: las figuras aparecen, el oro se enciende */
+.escena-griega .surge { opacity: 0; transform: translateY(8px); transition: opacity .8s ease, transform .8s ease; }
+.escena-griega .surge.on { opacity: 1; transform: none; }
+.escena-griega .dora { transition: fill 1.1s ease; }
+.escena-griega .dora.on { fill: #E8B53A; }
+.escena-griega .dora-linea { transition: stroke 1.1s ease; }
+.escena-griega .dora-linea.on { stroke: #E8B53A; }
+.escena-griega .trazo.crema { stroke: #F3DDB3; stroke-width: 2; }
+.escena-griega .final .atenua-final { opacity: .35 !important; transition: opacity 1.6s ease; }
+
 /* ---------- Etapa 2: práctica ---------- */
 .practica { text-align: center; }
 .progreso {

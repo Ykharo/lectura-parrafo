@@ -14,6 +14,8 @@ const MAX_POR_ESCENA = 5;        // palabras difíciles a practicar por escena
 const UMBRAL_ESCENA = 1.5;       // puntaje mínimo de dificultad dentro de una escena
 
 const juegosDe = (t) => (cuentoDe(t) && cuentoDe(t).juegos) || {};
+// Estilo visual del cuento: 'griego' usa el muro, la escalera y las escenas de jarrón griego
+const esGriego = () => { const def = cuentoDe(texto); return !!def && def.estilo === 'griego'; };
 
 // Selección automática para cuentos: hasta 5 palabras difíciles por escena (oración)
 function dificilesPorEscena(ps, ors) {
@@ -87,7 +89,7 @@ function etapaMuro(lista = listaMuro(), alFin = null) {
   ocultarAviso();
   marcarPaso(2);
   practica = { lista, indice: 0, consumidas: 0, ignorar: false, saltadas: new Set(), alFin: seguir };
-  pantalla('juego juego-muro', `
+  pantalla(`juego juego-muro${esGriego() ? ' griego' : ''}`, `
     <p class="progreso" id="j-progreso"></p>
     <svg viewBox="0 0 1000 260" aria-hidden="true"></svg>
     <p class="parrafo oracion-juego" id="j-oracion"></p>
@@ -97,7 +99,7 @@ function etapaMuro(lista = listaMuro(), alFin = null) {
     const el = $vista.querySelector('.objetivo');
     if (el) el.classList.toggle('latiendo', si);
   };
-  muroJuego = Muro.crear($vista.querySelector('svg'), {
+  muroJuego = (esGriego() ? MuroGriego : Muro).crear($vista.querySelector('svg'), {
     // la palabra late mientras espera la lectura
     alListo: (golpes) => {
       latir(true);
@@ -131,7 +133,9 @@ function mostrarMuro() {
     .map((w) => (w.i === p.i ? `<span class="objetivo">${escapar(w.bruta)}</span>` : escapar(w.bruta)))
     .join(' ');
   practica.consumidas = escucha.cantidad;
-  muroJuego.palabra(p.silabas);
+  // En el estilo griego, la última palabra de cada escena trae a los dioses
+  const ultimaDeEscena = deLaEscena[deLaEscena.length - 1] === p;
+  muroJuego.palabra(p.silabas, { texto: p.limpia, dioses: ultimaDeEscena });
 }
 
 function oirMuro(t) {
@@ -182,7 +186,7 @@ function etapaEscalera({ desde = 0, hasta = oracionesTexto.length, alFin = antes
 
 function montarOracionEscalera() {
   const o = oracionesTexto[frases.oracion];
-  pantalla('juego juego-escalera lectura frases', `
+  pantalla(`juego juego-escalera lectura frases${esGriego() ? ' griego' : ''}`, `
     <p class="progreso">Escena ${frases.oracion + 1} de ${oracionesTexto.length} · Por bloques</p>
     <svg viewBox="0 0 1000 520" preserveAspectRatio="xMidYMid meet" aria-hidden="true"></svg>
     <p class="parrafo" id="j-frase"></p>
@@ -192,7 +196,7 @@ function montarOracionEscalera() {
     { texto: 'Siguiente', accion: () => { if (!frases.acerto) completarNivel(); } },
   ]);
   if (escaleraJuego) escaleraJuego.destruir();
-  escaleraJuego = Escalera.crear(
+  escaleraJuego = (esGriego() ? EscaleraGriega : Escalera).crear(
     $vista.querySelector('svg'),
     palabras.slice(o.inicio, o.fin).map((p) => p.bruta),
     o.bloques.map(([a, b]) => [a - o.inicio, b - o.inicio]),
@@ -367,9 +371,9 @@ function etapaCuento() {
 function montarEscena(k, rotulo, mensaje, botones) {
   const o = oracionesTexto[k];
   const ps = palabras.slice(o.inicio, o.fin).map((p) => `<span class="p" data-i="${p.i}">${escapar(p.bruta)}</span>`).join(' ');
-  pantalla('lectura cuento', `
+  pantalla(`lectura cuento${esGriego() ? ' griego' : ''}`, `
     <p class="progreso">${rotulo}</p>
-    <div class="escena-cuento">
+    <div class="escena-cuento${esGriego() ? ' escena-griega' : ''}">
       <svg viewBox="0 0 1000 520" preserveAspectRatio="xMidYMid meet" aria-hidden="true">${cuento.def.escenas[k]}</svg>
     </div>
     <p class="parrafo">${ps}</p>

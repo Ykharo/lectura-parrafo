@@ -1,0 +1,459 @@
+{
+  "texto": "midas",
+  "audio": "midas.wav",
+  "duracion": 43.24,
+  "palabras": [
+    {
+      "palabra": "El",
+      "inicio": 0.26
+    },
+    {
+      "palabra": "rey",
+      "inicio": 0.47
+    },
+    {
+      "palabra": "Midas",
+      "inicio": 0.68
+    },
+    {
+      "palabra": "amaba",
+      "inicio": 1.06
+    },
+    {
+      "palabra": "el",
+      "inicio": 1.6
+    },
+    {
+      "palabra": "oro",
+      "inicio": 1.81
+    },
+    {
+      "palabra": "más",
+      "inicio": 2.19
+    },
+    {
+      "palabra": "que",
+      "inicio": 2.4
+    },
+    {
+      "palabra": "nada",
+      "inicio": 2.61
+    },
+    {
+      "palabra": "en",
+      "inicio": 2.99
+    },
+    {
+      "palabra": "el",
+      "inicio": 3.2
+    },
+    {
+      "palabra": "mundo.",
+      "inicio": 3.41
+    },
+    {
+      "palabra": "Un",
+      "inicio": 4.53
+    },
+    {
+      "palabra": "día,",
+      "inicio": 4.73
+    },
+    {
+      "palabra": "el",
+      "inicio": 5.1
+    },
+    {
+      "palabra": "dios",
+      "inicio": 5.3
+    },
+    {
+      "palabra": "Dioniso",
+      "inicio": 5.5
+    },
+    {
+      "palabra": "le",
+      "inicio": 6.02
+    },
+    {
+      "palabra": "concedió",
+      "inicio": 6.23
+    },
+    {
+      "palabra": "un",
+      "inicio": 6.74
+    },
+    {
+      "palabra": "deseo",
+      "inicio": 6.95
+    },
+    {
+      "palabra": "muy",
+      "inicio": 7.47
+    },
+    {
+      "palabra": "especial.",
+      "inicio": 7.67
+    },
+    {
+      "palabra": "Midas",
+      "inicio": 9.1
+    },
+    {
+      "palabra": "pidió",
+      "inicio": 9.47
+    },
+    {
+      "palabra": "que",
+      "inicio": 9.84
+    },
+    {
+      "palabra": "todo",
+      "inicio": 10.2
+    },
+    {
+      "palabra": "lo",
+      "inicio": 10.52
+    },
+    {
+      "palabra": "que",
+      "inicio": 10.7
+    },
+    {
+      "palabra": "tocara",
+      "inicio": 10.87
+    },
+    {
+      "palabra": "se",
+      "inicio": 11.33
+    },
+    {
+      "palabra": "convirtiera",
+      "inicio": 11.51
+    },
+    {
+      "palabra": "en",
+      "inicio": 12.1
+    },
+    {
+      "palabra": "oro",
+      "inicio": 12.4
+    },
+    {
+      "palabra": "brillante.",
+      "inicio": 12.72
+    },
+    {
+      "palabra": "Al",
+      "inicio": 14.05
+    },
+    {
+      "palabra": "principio",
+      "inicio": 14.28
+    },
+    {
+      "palabra": "estaba",
+      "inicio": 14.85
+    },
+    {
+      "palabra": "feliz",
+      "inicio": 15.76
+    },
+    {
+      "palabra": "y",
+      "inicio": 16.12
+    },
+    {
+      "palabra": "tocó",
+      "inicio": 16.32
+    },
+    {
+      "palabra": "las",
+      "inicio": 16.68
+    },
+    {
+      "palabra": "flores,",
+      "inicio": 16.88
+    },
+    {
+      "palabra": "las",
+      "inicio": 17.23
+    },
+    {
+      "palabra": "sillas",
+      "inicio": 17.43
+    },
+    {
+      "palabra": "y",
+      "inicio": 17.79
+    },
+    {
+      "palabra": "las",
+      "inicio": 17.99
+    },
+    {
+      "palabra": "piedras",
+      "inicio": 18.19
+    },
+    {
+      "palabra": "del",
+      "inicio": 18.55
+    },
+    {
+      "palabra": "jardín.",
+      "inicio": 18.75
+    },
+    {
+      "palabra": "Pero",
+      "inicio": 19.89
+    },
+    {
+      "palabra": "cuando",
+      "inicio": 20.2
+    },
+    {
+      "palabra": "quiso",
+      "inicio": 20.5
+    },
+    {
+      "palabra": "comer,",
+      "inicio": 20.8
+    },
+    {
+      "palabra": "el",
+      "inicio": 21.53
+    },
+    {
+      "palabra": "pan",
+      "inicio": 21.84
+    },
+    {
+      "palabra": "y",
+      "inicio": 22.04
+    },
+    {
+      "palabra": "las",
+      "inicio": 22.23
+    },
+    {
+      "palabra": "uvas",
+      "inicio": 22.43
+    },
+    {
+      "palabra": "también",
+      "inicio": 22.77
+    },
+    {
+      "palabra": "se",
+      "inicio": 23.33
+    },
+    {
+      "palabra": "volvieron",
+      "inicio": 23.56
+    },
+    {
+      "palabra": "de",
+      "inicio": 24.16
+    },
+    {
+      "palabra": "oro.",
+      "inicio": 24.39
+    },
+    {
+      "palabra": "Tenía",
+      "inicio": 25.6
+    },
+    {
+      "palabra": "mucha",
+      "inicio": 26.12
+    },
+    {
+      "palabra": "hambre",
+      "inicio": 26.48
+    },
+    {
+      "palabra": "y",
+      "inicio": 26.85
+    },
+    {
+      "palabra": "mucha",
+      "inicio": 27.05
+    },
+    {
+      "palabra": "sed,",
+      "inicio": 27.41
+    },
+    {
+      "palabra": "y",
+      "inicio": 28.1
+    },
+    {
+      "palabra": "comenzó",
+      "inicio": 28.26
+    },
+    {
+      "palabra": "a",
+      "inicio": 28.66
+    },
+    {
+      "palabra": "llorar.",
+      "inicio": 28.81
+    },
+    {
+      "palabra": "Entonces",
+      "inicio": 30.06
+    },
+    {
+      "palabra": "le",
+      "inicio": 30.51
+    },
+    {
+      "palabra": "rogó",
+      "inicio": 30.69
+    },
+    {
+      "palabra": "a",
+      "inicio": 31.01
+    },
+    {
+      "palabra": "Dioniso",
+      "inicio": 31.19
+    },
+    {
+      "palabra": "que",
+      "inicio": 31.64
+    },
+    {
+      "palabra": "le",
+      "inicio": 31.82
+    },
+    {
+      "palabra": "quitara",
+      "inicio": 32
+    },
+    {
+      "palabra": "ese",
+      "inicio": 32.46
+    },
+    {
+      "palabra": "poder.",
+      "inicio": 32.77
+    },
+    {
+      "palabra": "El",
+      "inicio": 33.99
+    },
+    {
+      "palabra": "dios",
+      "inicio": 34.13
+    },
+    {
+      "palabra": "le",
+      "inicio": 34.28
+    },
+    {
+      "palabra": "dijo",
+      "inicio": 34.42
+    },
+    {
+      "palabra": "que",
+      "inicio": 34.67
+    },
+    {
+      "palabra": "se",
+      "inicio": 34.81
+    },
+    {
+      "palabra": "lavara",
+      "inicio": 34.96
+    },
+    {
+      "palabra": "en",
+      "inicio": 35.32
+    },
+    {
+      "palabra": "el",
+      "inicio": 35.46
+    },
+    {
+      "palabra": "río,",
+      "inicio": 35.6
+    },
+    {
+      "palabra": "y",
+      "inicio": 35.86
+    },
+    {
+      "palabra": "así",
+      "inicio": 36.13
+    },
+    {
+      "palabra": "lo",
+      "inicio": 36.42
+    },
+    {
+      "palabra": "hizo.",
+      "inicio": 36.58
+    },
+    {
+      "palabra": "Desde",
+      "inicio": 37.61
+    },
+    {
+      "palabra": "ese",
+      "inicio": 37.9
+    },
+    {
+      "palabra": "día,",
+      "inicio": 38.19
+    },
+    {
+      "palabra": "Midas",
+      "inicio": 38.71
+    },
+    {
+      "palabra": "prefirió",
+      "inicio": 39.05
+    },
+    {
+      "palabra": "una",
+      "inicio": 39.55
+    },
+    {
+      "palabra": "mesa",
+      "inicio": 39.9
+    },
+    {
+      "palabra": "con",
+      "inicio": 40.24
+    },
+    {
+      "palabra": "comida",
+      "inicio": 40.44
+    },
+    {
+      "palabra": "antes",
+      "inicio": 41.31
+    },
+    {
+      "palabra": "que",
+      "inicio": 41.61
+    },
+    {
+      "palabra": "un",
+      "inicio": 41.79
+    },
+    {
+      "palabra": "palacio",
+      "inicio": 41.96
+    },
+    {
+      "palabra": "de",
+      "inicio": 42.39
+    },
+    {
+      "palabra": "oro.",
+      "inicio": 42.57
+    }
+  ]
+}

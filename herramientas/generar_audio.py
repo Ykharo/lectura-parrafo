@@ -1,11 +1,14 @@
-# Genera la lectura en voz alta de un texto con Gemini (basado en el código de AI Studio).
+# Genera la lectura en voz alta de un cuento con Gemini (basado en el código de AI Studio).
 #
 # Requisitos (una sola vez):
 #   pip install google-genai
 #   y una clave de API de Gemini (AI Studio → "Get API key") en la variable de entorno GEMINI_API_KEY.
 #
 # Uso (desde la carpeta del proyecto):
-#   python herramientas/generar_audio.py
+#   python herramientas/generar_audio.py midas
+#   python herramientas/generar_audio.py astronauta
+# Guarda assets/audio/<id>.wav. Después, para los tiempos de cada palabra:
+#   node herramientas/sincronizar.js <id> assets/audio/<id>.wav
 #
 # La clave NUNCA se escribe en este archivo: se lee del entorno.
 
@@ -17,24 +20,37 @@ import sys
 from google import genai
 from google.genai import types
 
-TEXTO = (
-    "Lucas sueña con ser astronauta. Todas las noches mira las estrellas con su telescopio "
-    "desde la ventana de su habitación. Ya conoce el nombre de varios planetas: Mercurio, Venus, "
-    "Marte y Júpiter. Su favorito es Saturno, porque tiene unos anillos espectaculares. Algún día, "
-    "Lucas quiere viajar por el espacio y descubrir un planeta nuevo para ponerle el nombre de su perro."
-)
+# El texto debe ser idéntico al de js/textos.js (sin las marcas " / ").
+TEXTOS = {
+    "astronauta": (
+        "Lucas sueña con ser astronauta. Todas las noches mira las estrellas con su telescopio "
+        "desde la ventana de su habitación. Ya conoce el nombre de varios planetas: Mercurio, Venus, "
+        "Marte y Júpiter. Su favorito es Saturno, porque tiene unos anillos espectaculares. Algún día, "
+        "Lucas quiere viajar por el espacio y descubrir un planeta nuevo para ponerle el nombre de su perro."
+    ),
+    "midas": (
+        "El rey Midas amaba el oro más que nada en el mundo. Un día, el dios Dioniso le concedió un deseo muy especial. "
+        "Midas pidió que todo lo que tocara se convirtiera en oro brillante. Al principio estaba feliz y tocó las flores, "
+        "las sillas y las piedras del jardín. Pero cuando quiso comer, el pan y las uvas también se volvieron de oro. "
+        "Tenía mucha hambre y mucha sed, y comenzó a llorar. Entonces le rogó a Dioniso que le quitara ese poder. "
+        "El dios le dijo que se lavara en el río, y así lo hizo. Desde ese día, Midas prefirió una mesa con comida "
+        "antes que un palacio de oro."
+    ),
+}
 VOZ = "Sami"
 MODELO = "gemini-3.8-flash-tts"
-SALIDA = os.path.join(os.path.dirname(__file__), "..", "assets", "audio", "astronauta")
+CARPETA = os.path.join(os.path.dirname(__file__), "..", "assets", "audio")
 
 
-def generar():
+def generar(id_texto):
+    if id_texto not in TEXTOS:
+        sys.exit(f"No existe el texto '{id_texto}'. Opciones: {', '.join(TEXTOS)}")
     clave = os.environ.get("GEMINI_API_KEY")
     if not clave:
         sys.exit("Falta la variable de entorno GEMINI_API_KEY.")
 
     cliente = genai.Client(api_key=clave)
-    contenido = [types.Content(role="user", parts=[types.Part.from_text(text=f"## Transcript:\n{TEXTO}")])]
+    contenido = [types.Content(role="user", parts=[types.Part.from_text(text=f"## Transcript:\n{TEXTOS[id_texto]}")])]
     config = types.GenerateContentConfig(
         temperature=1,
         response_modalities=["audio"],
@@ -59,8 +75,8 @@ def generar():
         extension = ".wav"
         datos = a_wav(datos, tipo)
 
-    os.makedirs(os.path.dirname(SALIDA), exist_ok=True)
-    ruta = os.path.abspath(SALIDA + extension)
+    os.makedirs(CARPETA, exist_ok=True)
+    ruta = os.path.abspath(os.path.join(CARPETA, id_texto + extension))
     with open(ruta, "wb") as f:
         f.write(datos)
     print(f"Audio guardado en: {ruta}")
@@ -90,4 +106,6 @@ def a_wav(datos: bytes, tipo: str) -> bytes:
 
 
 if __name__ == "__main__":
-    generar()
+    if len(sys.argv) < 2:
+        sys.exit("Uso: python herramientas/generar_audio.py <id>   (por ejemplo: midas)")
+    generar(sys.argv[1])
