@@ -551,7 +551,7 @@
   function detenerGrabacion() {
     grab.activa = false;
     grab.duracion = (performance.now() - grab.t0) / 1000;
-    try { reconocedor?.abort(); } catch { /* nada */ }
+    try { if (reconocedor) reconocedor.abort(); } catch { /* nada */ }
     if (recorder && recorder.state !== 'inactive') recorder.stop();
     $('b-grabar').textContent = '● Grabar mi lectura';
     $('b-grabar').classList.remove('grabando');

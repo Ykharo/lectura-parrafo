@@ -8,7 +8,31 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/styles.css?v=4">
+  <script>
+    // Diagnóstico: si algo falla, el error se muestra en pantalla (útil en el iPad). Tocar para cerrar.
+    (function () {
+      function mostrar(texto) {
+        var caja = document.getElementById('errores');
+        if (!caja) {
+          caja = document.createElement('div');
+          caja.id = 'errores';
+          caja.style.cssText = 'position:fixed;left:8px;right:8px;top:8px;z-index:99;padding:10px 12px;border:1px solid #e5484d;' +
+            'border-radius:10px;background:#1a0505;color:#ffb4b4;font:13px/1.4 monospace;white-space:pre-wrap;max-height:40vh;overflow:auto';
+          caja.onclick = function () { caja.remove(); };
+          (document.body || document.documentElement).appendChild(caja);
+        }
+        caja.textContent += texto + '\n';
+      }
+      window.addEventListener('error', function (e) {
+        var archivo = String(e.filename || '').split('/').pop();
+        mostrar('Error: ' + e.message + (archivo ? ' (' + archivo + ':' + e.lineno + ')' : ''));
+      });
+      window.addEventListener('unhandledrejection', function (e) {
+        mostrar('Error: ' + (e.reason && e.reason.message ? e.reason.message : e.reason));
+      });
+    })();
+  </script>
 </head>
 <body>
   <nav class="pasos" aria-label="Etapas">
@@ -24,14 +48,15 @@
   <div id="mic" class="mic" hidden title="Escuchando"></div>
   <div id="aviso" class="aviso" hidden></div>
 
-  <script src="js/analisis.js"></script>
-  <script src="js/almacen.js"></script>
-  <script src="js/textos.js"></script>
-  <script src="js/cuento.js"></script>
-  <script src="js/cuentos/astronauta.js"></script>
-  <script src="js/juegos/escalera.js"></script>
-  <script src="js/juegos/muro.js"></script>
-  <script src="js/cuento-app.js"></script>
-  <script src="js/app.js"></script>
+  <!-- ?v= obliga al iPad a descargar la versión nueva (subir el número en cada cambio) -->
+  <script src="js/analisis.js?v=4"></script>
+  <script src="js/almacen.js?v=4"></script>
+  <script src="js/textos.js?v=4"></script>
+  <script src="js/cuento.js?v=4"></script>
+  <script src="js/cuentos/astronauta.js?v=4"></script>
+  <script src="js/juegos/escalera.js?v=4"></script>
+  <script src="js/juegos/muro.js?v=4"></script>
+  <script src="js/cuento-app.js?v=4"></script>
+  <script src="js/app.js?v=4"></script>
 </body>
 </html>

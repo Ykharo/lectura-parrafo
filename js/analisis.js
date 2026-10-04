@@ -198,7 +198,7 @@
           }
         }
       }
-      o.bloques = manual ? tramos : tramos.flatMap(([a, b]) => partir(a, b));
+      o.bloques = manual ? tramos : tramos.reduce((todos, [a, b]) => todos.concat(partir(a, b)), []);
     }
     return res;
   }

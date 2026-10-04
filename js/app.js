@@ -178,7 +178,7 @@ const escucha = {
 
   nuevaSesion() {
     this.cantidad = 0;
-    this.alReiniciar?.();
+    if (this.alReiniciar) this.alReiniciar();
   },
 
   detener() {
@@ -200,7 +200,7 @@ const escucha = {
       for (let i = 0; i < e.results.length; i++) t += ' ' + e.results[i][0].transcript;
       const dichas = tokens(t);
       this.cantidad = dichas.length;
-      if (this.activo) this.alOir?.(dichas);
+      if (this.activo && this.alOir) this.alOir(dichas);
     };
     r.onerror = (e) => {
       if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
@@ -657,7 +657,8 @@ function pintarLectura() {
     const i = Number(el.dataset.i);
     el.className = `p ${lectura.estados[i]}${i === lectura.pos ? ' actual' : ''}`;
   });
-  $vista.querySelector('.actual')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  const actual = $vista.querySelector('.actual');
+  if (actual) actual.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
 }
 
 function terminarLectura() {

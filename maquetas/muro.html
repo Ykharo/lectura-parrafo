@@ -732,7 +732,7 @@
 
   function micDetener() {
     mic.activo = false;
-    try { mic.rec?.abort(); } catch { /* nada */ }
+    try { if (mic.rec) mic.rec.abort(); } catch { /* nada */ }
   }
 
   // ================= Controles =================
