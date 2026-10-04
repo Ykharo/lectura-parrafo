@@ -7,7 +7,8 @@ Aplicación web para practicar lectura en voz alta (español de Chile, nivel ~9 
 0. **Elegir texto**: 6 textos incluidos, más los que se agreguen con «+ Agregar texto».
 1. **Mirar**: el párrafo con las palabras difíciles en dorado. Tocar una palabra la agrega o la quita (queda guardado).
 2. **Practicar**: cada palabra difícil, grande y separada en sílabas. Avanza sola al reconocerla (2 rondas). «🔊 Escuchar» la pronuncia.
-3. **Leer**: el párrafo completo; cada palabra se pinta verde al leerla (naranja si se saltó). Al final: tiempo, palabras por minuto y palabras para repasar.
+3. **Frases**: cada oración se arma de a un bloque con sentido (`[A]`, `[A / B]`, `[A / B / C]`…) y se lee en voz alta en cada paso, hasta leerla completa. Los bloques se calculan solos (puntuación y palabras como *y, que, con, entre…*) o se marcan a mano escribiendo ` / ` en el texto.
+4. **Leer**: el párrafo completo; cada palabra se pinta verde al leerla (naranja si se saltó). Al final: tiempo, palabras por minuto y palabras para repasar.
 
 El **historial** guarda cada lectura en el iPad. Desde ahí se puede exportar o importar un respaldo (`.json`).
 

@@ -1,6 +1,6 @@
 'use strict';
 
-const { silabas, dificultad, normalizar, parecidas, alinear } = window.Analisis;
+const { silabas, dificultad, normalizar, parecidas, alinear, oraciones } = window.Analisis;
 
 // ================= Configuración =================
 const IDIOMA = 'es-CL';         // acento del reconocimiento de voz
@@ -14,13 +14,22 @@ let texto = null;               // { id, titulo, parrafo, propio? }
 let palabras = [];
 let esperadas = [];
 let dificiles = new Set();      // palabras difíciles (normalizadas)
+let oracionesTexto = [];        // [{ inicio, fin, bloques: [[inicio, fin], …] }]
 
+// Un " / " en el párrafo marca el inicio de un bloque (etapa Frases); no se muestra.
 function analizarParrafo(parrafo) {
-  return parrafo.trim().split(/\s+/).map((bruta, i) => {
+  const res = [];
+  let corte = false;
+  for (const bruta of parrafo.replace(/\s*\/\s*/g, ' / ').trim().split(/\s+/)) {
+    if (bruta === '/') { corte = true; continue; }
     const limpia = bruta.replace(/[^\p{L}]/gu, '');
-    return { i, bruta, limpia, norm: normalizar(limpia), silabas: silabas(limpia), puntos: dificultad(limpia) };
-  });
+    res.push({ i: res.length, bruta, limpia, norm: normalizar(limpia), silabas: silabas(limpia), puntos: dificultad(limpia), corte });
+    corte = false;
+  }
+  return res;
 }
+
+const sinMarcas = (parrafo) => parrafo.replace(/\s*\/\s*/g, ' ').trim();
 
 // Las de mayor puntaje primero, sin repetir.
 function dificilesAutomaticas(ps) {
@@ -36,6 +45,7 @@ function cargarTexto(t) {
   texto = t;
   palabras = analizarParrafo(t.parrafo);
   esperadas = palabras.map((p) => p.norm);
+  oracionesTexto = oraciones(palabras);
   dificiles = new Set(Almacen.dificiles(t.id) || dificilesAutomaticas(palabras));
 }
 
@@ -129,13 +139,20 @@ const escucha = {
   rec: null,
   alOir: null,       // (palabras reconocidas en la sesión actual) => void
   alReiniciar: null, // se llama cuando empieza una sesión nueva (las palabras vuelven a cero)
+  cantidad: 0,       // palabras reconocidas hasta ahora en la sesión
 
+  // Si ya está escuchando no hace nada: la etapa siguiente solo cambia alOir/alReiniciar.
   iniciar() {
-    if (!Reconocedor) return;
+    if (!Reconocedor || this.activo) return;
     this.activo = true;
     if (!this.rec) this.crear();
+    this.nuevaSesion();
+    try { this.rec.start(); } catch { /* termina de cerrarse la sesión anterior; onend la reanuda */ }
+  },
+
+  nuevaSesion() {
+    this.cantidad = 0;
     this.alReiniciar?.();
-    try { this.rec.start(); } catch { /* ya estaba escuchando */ }
   },
 
   detener() {
@@ -155,7 +172,9 @@ const escucha = {
     r.onresult = (e) => {
       let t = '';
       for (let i = 0; i < e.results.length; i++) t += ' ' + e.results[i][0].transcript;
-      if (this.activo) this.alOir?.(tokens(t));
+      const dichas = tokens(t);
+      this.cantidad = dichas.length;
+      if (this.activo) this.alOir?.(dichas);
     };
     r.onerror = (e) => {
       if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
@@ -170,9 +189,12 @@ const escucha = {
       if (!this.activo) return;
       setTimeout(() => {
         if (!this.activo) return;
-        this.alReiniciar?.();
-        try { r.start(); } catch (err) {
+        try {
+          r.start();
+          this.nuevaSesion();
+        } catch (err) {
           if (err.name === 'InvalidStateError') return; // ya se reanudó por otro lado
+          this.activo = false;
           mostrarAviso('', { texto: 'Toca para seguir escuchando', accion: () => this.iniciar() });
         }
       }, 250);
@@ -195,8 +217,8 @@ function inicio() {
         <div class="tarjeta" data-id="${escapar(t.id)}">
           ${t.propio ? `<span class="borrar" data-borrar="${escapar(t.id)}" aria-label="Eliminar">✕</span>` : ''}
           <strong>${escapar(t.titulo)}</strong>
-          <span class="vista-previa">${escapar(t.parrafo.trim().split(/\s+/).slice(0, 9).join(' '))}…</span>
-          <span class="meta">${t.parrafo.trim().split(/\s+/).length} palabras${t.propio ? ' · agregado' : ''}</span>
+          <span class="vista-previa">${escapar(sinMarcas(t.parrafo).split(/\s+/).slice(0, 9).join(' '))}…</span>
+          <span class="meta">${sinMarcas(t.parrafo).split(/\s+/).length} palabras${t.propio ? ' · agregado' : ''}</span>
         </div>`).join('')}
     </div>
   `, [
@@ -231,6 +253,8 @@ function agregarTexto() {
       <textarea id="f-parrafo" placeholder="Escribe o pega aquí el párrafo…"></textarea>
     </label>
     <p class="contador" id="f-contador">0 palabras</p>
+    <p class="nota">Opcional: escribe <b>/</b> donde termina cada bloque con sentido para la etapa «Frases».
+      Ej: <i>Había una vez / un gato gris / que vivía en el techo.</i> Si no pones ninguna, se calculan solos.</p>
   `, [
     { texto: 'Cancelar', accion: inicio },
     { texto: 'Guardar y leer', primario: true, accion: guardar },
@@ -239,7 +263,7 @@ function agregarTexto() {
   const $titulo = document.getElementById('f-titulo');
   const $parrafo = document.getElementById('f-parrafo');
   const $contador = document.getElementById('f-contador');
-  const contar = () => ($parrafo.value.trim() ? $parrafo.value.trim().split(/\s+/).length : 0);
+  const contar = () => (sinMarcas($parrafo.value) ? sinMarcas($parrafo.value).split(/\s+/).length : 0);
 
   $parrafo.addEventListener('input', () => {
     const n = contar();
@@ -349,7 +373,7 @@ function etapa1() {
       el.classList.toggle('dificil', dificiles.has(palabras[el.dataset.i].norm));
     });
     const n = listaPractica().length;
-    boton.textContent = n ? `Practicar ${n} palabras` : 'Ir a la lectura';
+    boton.textContent = n ? `Practicar ${n} palabras` : 'Leer por frases';
   };
   // Tocar una palabra la agrega o la quita de las difíciles (queda guardado para este texto).
   $vista.querySelector('.parrafo').addEventListener('click', (e) => {
@@ -371,10 +395,10 @@ let practica = null;
 
 function etapa2() {
   const lista = listaPractica();
-  if (!lista.length) return antesDeLeer();
+  if (!lista.length) return etapaFrases();
   marcarPaso(2);
-  practica = { lista, ronda: 1, indice: 0, consumidas: 0, ultimas: 0, pausada: false, acerto: false, saltadas: new Set() };
-  escucha.alReiniciar = () => { practica.consumidas = 0; practica.ultimas = 0; };
+  practica = { lista, ronda: 1, indice: 0, consumidas: 0, pausada: false, acerto: false, saltadas: new Set() };
+  escucha.alReiniciar = () => { practica.consumidas = 0; };
   escucha.alOir = oirPractica;
   escucha.iniciar();
   mostrarPalabra();
@@ -385,7 +409,7 @@ function mostrarPalabra() {
   const p = lista[indice];
   practica.pausada = false;
   practica.acerto = false;
-  practica.consumidas = practica.ultimas; // ignora lo dicho antes de mostrar la palabra
+  practica.consumidas = escucha.cantidad; // ignora lo dicho antes de mostrar la palabra
   const puntos = lista.map((_, k) => `<span class="${k < indice ? 'hecho' : k === indice ? 'ahora' : ''}"></span>`).join('');
   pantalla('practica', `
     <p class="progreso">Ronda ${ronda} de ${RONDAS_PRACTICA}</p>
@@ -400,7 +424,6 @@ function mostrarPalabra() {
 }
 
 function oirPractica(t) {
-  practica.ultimas = t.length;
   if (practica.consumidas > t.length) practica.consumidas = t.length;
   if (practica.pausada) return;
   const objetivo = practica.lista[practica.indice].norm;
@@ -411,21 +434,28 @@ function oirPractica(t) {
   practica.acerto = true;
   practica.consumidas = t.length;
   $vista.querySelector('.palabra-grande').classList.add('bien');
-  const msg = $vista.querySelector('.mensaje');
-  msg.textContent = ['¡Muy bien!', '¡Excelente!', '¡Bien hecho!', '¡Perfecto!'][Math.floor(Math.random() * 4)];
-  msg.classList.add('bien');
+  felicitar();
   setTimeout(siguientePalabra, 900);
 }
 
-async function escucharModelo() {
-  if (practica.acerto) return;
-  practica.pausada = true; // que no cuente la voz del iPad como lectura
-  await decir(practica.lista[practica.indice].limpia);
+function felicitar() {
+  const msg = $vista.querySelector('.mensaje');
+  msg.textContent = ['¡Muy bien!', '¡Excelente!', '¡Bien hecho!', '¡Perfecto!'][Math.floor(Math.random() * 4)];
+  msg.classList.add('bien');
+}
+
+// Lee en voz alta el modelo sin que el micrófono lo cuente como lectura de la niña.
+async function hablarSinContar(etapa, frase) {
+  if (etapa.acerto) return;
+  etapa.pausada = true;
+  await decir(frase);
   setTimeout(() => {
-    practica.consumidas = practica.ultimas;
-    practica.pausada = false;
+    etapa.consumidas = escucha.cantidad;
+    etapa.pausada = false;
   }, 700);
 }
+
+const escucharModelo = () => hablarSinContar(practica, practica.lista[practica.indice].limpia);
 
 function saltarPalabra() {
   if (practica.acerto) return; // ya va a avanzar sola
@@ -446,27 +476,117 @@ function siguientePalabra() {
     `);
     return setTimeout(mostrarPalabra, 1800);
   }
+  // Sigue escuchando: la etapa Frases toma el micrófono sin pedir otro toque.
+  practica.pausada = true;
+  pantalla('centro', `
+    <p class="grande">¡Palabras listas!</p>
+    <p class="sub">Ahora vamos a leer por frases.</p>
+  `);
+  setTimeout(etapaFrases, 1800);
+}
+
+// ================= Etapa 3: frases que crecen por bloques =================
+// Cada oración se arma de a un bloque con sentido: [A], [A B], [A B C]… hasta leerla completa.
+let frases = null;
+
+function etapaFrases() {
+  ocultarAviso();
+  marcarPaso(3);
+  const pasos = [];
+  oracionesTexto.forEach((o, n) => o.bloques.forEach((_, k) => pasos.push({ oracion: n, bloques: k + 1 })));
+  frases = { pasos, indice: 0, consumidas: 0, pausada: false, acerto: false };
+  escucha.alReiniciar = () => {
+    // si el micrófono se reanuda a mitad de la frase, se sigue desde donde iba
+    frases.base = frases.estados;
+    frases.desde = frases.pos;
+    frases.consumidas = 0;
+  };
+  escucha.alOir = oirFrase;
+  escucha.iniciar();
+  mostrarPasoFrase();
+}
+
+function mostrarPasoFrase() {
+  const paso = frases.pasos[frases.indice];
+  const o = oracionesTexto[paso.oracion];
+  const visibles = o.bloques.slice(0, paso.bloques);
+  Object.assign(frases, {
+    inicio: o.inicio,
+    fin: visibles[visibles.length - 1][1],
+    desde: o.inicio,
+    pos: o.inicio,
+    base: palabras.map(() => 'pendiente'),
+    pausada: false,
+    acerto: false,
+    consumidas: escucha.cantidad, // ignora lo dicho en el paso anterior
+  });
+  frases.estados = frases.base;
+
+  const html = visibles.map(([a, b], k) => {
+    const nuevo = k === visibles.length - 1 && k > 0 ? ' nuevo' : '';
+    const ps = palabras.slice(a, b).map((p) => `<span class="p" data-i="${p.i}">${escapar(p.bruta)}</span>`).join(' ');
+    return `<span class="bloque${nuevo}">${ps}</span>`;
+  }).join('<span class="corte">/</span>');
+  const puntos = o.bloques.map((_, k) => `<span class="${k < paso.bloques - 1 ? 'hecho' : k === paso.bloques - 1 ? 'ahora' : ''}"></span>`).join('');
+  const completa = paso.bloques === o.bloques.length;
+
+  pantalla('lectura frases', `
+    <p class="progreso">Oración ${paso.oracion + 1} de ${oracionesTexto.length}</p>
+    <p class="parrafo">${html}</p>
+    <div class="mensaje">${completa ? 'Ahora la oración completa' : 'Lee en voz alta'}</div>
+    <div class="barra">${puntos}</div>
+  `, [
+    { texto: '🔊 Escuchar', accion: () => hablarSinContar(frases, palabras.slice(frases.inicio, frases.fin).map((p) => p.bruta).join(' ')) },
+    { texto: 'Siguiente', accion: () => { if (!frases.acerto) siguientePasoFrase(); } },
+  ]);
+  pintarFrase();
+}
+
+function oirFrase(t) {
+  if (frases.consumidas > t.length) frases.consumidas = t.length;
+  if (frases.pausada) return;
+  const r = alinear(esperadas.slice(0, frases.fin), t.slice(frases.consumidas), frases.desde, frases.base);
+  frases.pos = r.pos;
+  frases.estados = r.estados;
+  pintarFrase();
+  if (frases.pos < frases.fin) return;
+  frases.pausada = true;
+  frases.acerto = true;
+  felicitar();
+  setTimeout(siguientePasoFrase, 900);
+}
+
+function pintarFrase() {
+  $vista.querySelectorAll('.p').forEach((el) => {
+    const i = Number(el.dataset.i);
+    el.className = `p ${frases.estados[i]}${i === frases.pos ? ' actual' : ''}`;
+  });
+}
+
+function siguientePasoFrase() {
+  frases.indice++;
+  if (frases.indice < frases.pasos.length) return mostrarPasoFrase();
   antesDeLeer();
 }
 
 function antesDeLeer() {
   escucha.detener();
-  marcarPaso(3);
+  marcarPaso(4);
   pantalla('centro', `
     <p class="grande">¡Muy bien!</p>
     <p class="sub">Ahora lee el párrafo completo en voz alta.</p>
-  `, [{ texto: 'Comenzar lectura', primario: true, accion: etapa3 }]);
+  `, [{ texto: 'Comenzar lectura', primario: true, accion: etapaLectura }]);
 }
 
-// ================= Etapa 3: lectura completa =================
+// ================= Etapa 4: lectura completa =================
 let lectura = null;
 
-function etapa3() {
+function etapaLectura() {
   ocultarAviso();
-  marcarPaso(3);
+  marcarPaso(4);
   const vacio = palabras.map(() => 'pendiente');
   lectura = { base: vacio, estados: vacio, inicioSesion: 0, pos: 0, t0: null, t1: null, terminada: false };
-  pantalla('paso3', `<p class="titulo">${escapar(texto.titulo)}</p>${htmlParrafo()}`,
+  pantalla('lectura', `<p class="titulo">${escapar(texto.titulo)}</p>${htmlParrafo()}`,
     [{ texto: 'Terminar', accion: terminarLectura }]);
   escucha.alReiniciar = () => {
     lectura.base = lectura.estados.slice();
@@ -538,7 +658,7 @@ function resultados() {
     ${repasar.length ? `<div class="repasar"><p>Para repasar</p>${repasar.map((w) => `<span class="chip">${escapar(w)}</span>`).join('')}</div>` : ''}
   `, [
     { texto: 'Otro texto', accion: inicio },
-    { texto: 'Leer otra vez', primario: true, accion: etapa3 },
+    { texto: 'Leer otra vez', primario: true, accion: etapaLectura },
   ]);
 }
 

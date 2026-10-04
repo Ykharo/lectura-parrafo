@@ -106,9 +106,17 @@ main {
 .paso1 .p.dificil { color: var(--dificil); font-weight: 600; }
 
 /* Etapa 3: lectura */
-.paso3 .p.leida { color: var(--bien); }
-.paso3 .p.saltada { color: var(--repasar); }
-.paso3 .p.actual { background: var(--actual); box-shadow: inset 0 -3px 0 var(--texto); }
+.lectura .p.leida { color: var(--bien); }
+.lectura .p.saltada { color: var(--repasar); }
+.lectura .p.actual { background: var(--actual); box-shadow: inset 0 -3px 0 var(--texto); }
+
+/* Etapa 3: frases que crecen por bloques */
+.frases { text-align: center; }
+.frases .parrafo { margin-top: 36px; font-size: clamp(30px, 4.4vw, 48px); line-height: 1.7; }
+.bloque { display: inline; }
+.bloque.nuevo { animation: aparecer .7s ease; }
+@keyframes aparecer { from { opacity: 0; filter: blur(4px); } }
+.corte { margin: 0 .35em; font-weight: 300; color: #3a3a3a; }
 
 /* ---------- Etapa 2: práctica ---------- */
 .practica { text-align: center; }

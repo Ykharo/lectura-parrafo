@@ -1,5 +1,7 @@
 // Textos incluidos en la aplicación. Los que se agregan desde la app se guardan en el iPad.
 // Para sumar uno aquí: copia un bloque y usa un `id` nuevo (sin espacios ni tildes).
+// Opcional: marca con " / " los bloques con sentido para la etapa «Frases». Si un texto no
+// tiene ninguna marca, los bloques se calculan solos (puntuación y palabras como y, que, con…).
 window.TEXTOS = [
   {
     id: 'tortuga',
@@ -23,19 +25,19 @@ window.TEXTOS = [
     id: 'ballena',
     titulo: 'La ballena del sur',
     parrafo:
-      'En las frías aguas del sur de Chile vive una ballena azul enorme, más grande que un bus. ' +
-      'Cada mañana sale a respirar y lanza un chorro de agua muy alto. Los pescadores la saludan desde ' +
-      'sus botes de colores. Aunque es gigante, la ballena se alimenta de animales diminutos llamados krill. ' +
-      'Cuando nada tranquila, parece una isla que se mueve lentamente por el mar.',
+      'En las frías aguas del sur de Chile / vive una ballena azul enorme, / más grande que un bus. ' +
+      'Cada mañana / sale a respirar / y lanza un chorro de agua muy alto. Los pescadores la saludan / desde ' +
+      'sus botes de colores. Aunque es gigante, / la ballena se alimenta / de animales diminutos / llamados krill. ' +
+      'Cuando nada tranquila, / parece una isla / que se mueve lentamente por el mar.',
   },
   {
     id: 'copihue',
     titulo: 'El copihue',
     parrafo:
-      'En el bosque del sur crece una flor roja con forma de campana llamada copihue. Es la flor nacional ' +
-      'de Chile. Sus pétalos brillan entre las hojas verdes de los árboles más altos. Cuenta una leyenda ' +
-      'que el copihue nació de las lágrimas de dos jóvenes enamorados. Por eso, cada vez que alguien ' +
-      'encuentra uno, lo mira con cariño y nunca lo arranca.',
+      'En el bosque del sur / crece una flor roja / con forma de campana / llamada copihue. Es la flor nacional ' +
+      'de Chile. Sus pétalos brillan / entre las hojas verdes / de los árboles más altos. Cuenta una leyenda / ' +
+      'que el copihue nació / de las lágrimas / de dos jóvenes enamorados. Por eso, / cada vez que alguien ' +
+      'encuentra uno, / lo mira con cariño / y nunca lo arranca.',
   },
   {
     id: 'empanadas',

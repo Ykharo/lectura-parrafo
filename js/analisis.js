@@ -142,5 +142,66 @@
     return { pos, estados };
   }
 
-  global.Analisis = { silabas, dificultad, normalizar, parecidas, alinear };
+  // ---------- Oraciones y bloques con sentido ----------
+  // Palabras antes de las que conviene cortar un bloque largo (de más a menos preferidas).
+  const CORTE_MEDIO = new Set(['y', 'e', 'o', 'u', 'ni', 'pero', 'porque', 'aunque', 'cuando', 'donde', 'que', 'mientras', 'como', 'si', 'sino', 'pues']);
+  // (no se corta antes de "de/del": casi siempre continúan la frase anterior)
+  const CORTE_DEBIL = new Set(['en', 'con', 'por', 'para', 'desde', 'hasta', 'entre', 'sin', 'sobre', 'hacia', 'bajo', 'tras', 'a', 'al']);
+  const FIN_ORACION = /[.?!…]["'»”)]*$/;
+  const PAUSA = /[,;:]["'»”)]*$/;
+
+  // palabras: [{ bruta, norm, corte }] (corte = el usuario marcó "/" antes de esta palabra)
+  // Devuelve [{ inicio, fin, bloques: [[inicio, fin], …] }] con índices de palabra (fin exclusivo).
+  function oraciones(palabras, { maxBloque = 7, minBloque = 2 } = {}) {
+    const manual = palabras.some((p) => p.corte);
+
+    // Parte un tramo largo cerca de la mitad, en la palabra de corte más adecuada.
+    function partir(s, e) {
+      if (e - s <= maxBloque) return [[s, e]];
+      for (const nivel of [CORTE_MEDIO, CORTE_DEBIL]) {
+        const opciones = [];
+        for (let k = s + minBloque; k <= e - minBloque; k++) if (nivel.has(palabras[k].norm)) opciones.push(k);
+        if (opciones.length) {
+          const mitad = (s + e) / 2;
+          const k = opciones.reduce((a, b) => (Math.abs(b - mitad) < Math.abs(a - mitad) ? b : a));
+          return [...partir(s, k), ...partir(k, e)];
+        }
+      }
+      return [[s, e]];
+    }
+
+    const res = [];
+    let inicio = 0;
+    palabras.forEach((p, i) => {
+      if (FIN_ORACION.test(p.bruta) || i === palabras.length - 1) {
+        res.push({ inicio, fin: i + 1 });
+        inicio = i + 1;
+      }
+    });
+
+    for (const o of res) {
+      // Primero se corta en la puntuación (o en las marcas "/" si el texto las tiene).
+      const tramos = [];
+      let s = o.inicio;
+      for (let i = o.inicio; i < o.fin; i++) {
+        if (manual && palabras[i].corte && i > s) { tramos.push([s, i]); s = i; }
+        if (!manual && i < o.fin - 1 && PAUSA.test(palabras[i].bruta)) { tramos.push([s, i + 1]); s = i + 1; }
+      }
+      tramos.push([s, o.fin]);
+      // Enumeraciones ("Mercurio, Venus, …"): un tramo de una palabra se une al siguiente.
+      if (!manual) {
+        for (let k = 0; k < tramos.length - 1; k++) {
+          const [a, b] = tramos[k];
+          if (b - a < minBloque && tramos[k + 1][1] - a <= maxBloque) {
+            tramos.splice(k, 2, [a, tramos[k + 1][1]]);
+            k--;
+          }
+        }
+      }
+      o.bloques = manual ? tramos : tramos.flatMap(([a, b]) => partir(a, b));
+    }
+    return res;
+  }
+
+  global.Analisis = { silabas, dificultad, normalizar, parecidas, alinear, oraciones };
 })(typeof window !== 'undefined' ? window : globalThis);
