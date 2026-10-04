@@ -376,6 +376,7 @@ button {
 }
 button.primario { background: var(--texto); border-color: var(--texto); color: #000; font-weight: 600; }
 button:active { transform: scale(.97); }
+button:disabled { opacity: .3; cursor: default; transform: none; }
 
 /* ---------- Micrófono y avisos ---------- */
 .mic {

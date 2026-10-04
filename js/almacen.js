@@ -3,7 +3,7 @@
   'use strict';
 
   const CLAVE = 'lectura-parrafo:v1';
-  const vacio = () => ({ textos: [], dificiles: {}, historial: [] });
+  const vacio = () => ({ textos: [], dificiles: {}, historial: [], leidos: [] });
 
   function leer() {
     try {
@@ -41,6 +41,10 @@
 
     dificiles: (id) => leer().dificiles[id] || null,
     guardarDificiles: (id, lista) => modificar((d) => { d.dificiles[id] = lista; }),
+
+    // Textos que ya se leyeron completos al menos una vez
+    leido: (id) => leer().leidos.indexOf(id) >= 0,
+    marcarLeido: (id) => modificar((d) => { if (d.leidos.indexOf(id) < 0) d.leidos.push(id); }),
 
     historial: () => leer().historial,
     agregarLectura: (r) => modificar((d) => { d.historial.push(r); }),

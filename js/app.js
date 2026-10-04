@@ -108,6 +108,7 @@ function ponerBotones(botones) {
     const el = document.createElement('button');
     el.textContent = b.texto;
     if (b.primario) el.className = 'primario';
+    if (b.deshabilitado) el.disabled = true;
     el.addEventListener('click', b.accion);
     $acciones.appendChild(el);
   }
@@ -389,17 +390,18 @@ function etapa1() {
   marcarPaso(1);
   practica = null;
   const animado = !!cuentoDe(texto);
-  // En los cuentos animados, quien ya lo leyó puede ir directo a la lectura o al cuento completo
-  const yaLeido = animado && Almacen.historial().some((r) => r.textoId === texto.id);
+  // En los cuentos animados, ir directo a la lectura o al cuento completo se habilita
+  // solo cuando ya se leyó el cuento completo una vez.
+  const yaLeido = animado && Almacen.leido(texto.id);
   pantalla('paso1', `
     <p class="titulo">${escapar(texto.titulo)}</p>
     <p class="indicacion">Mira el texto. Las palabras en <b>dorado</b> son las más difíciles.</p>
     ${htmlParrafo()}
   `, [
     { texto: '← Textos', accion: inicio },
-    ...(yaLeido ? [
-      { texto: '▶ Escuchar el cuento', accion: verCuentoCompleto },
-      { texto: 'Leer con animación', accion: etapaCuento },
+    ...(animado ? [
+      { texto: '▶ Escuchar el cuento', accion: verCuentoCompleto, deshabilitado: !yaLeido },
+      { texto: 'Leer con animación', accion: etapaCuento, deshabilitado: !yaLeido },
     ] : []),
     { texto: '', primario: true, accion: animado ? empezarGuiado : etapa2 },
   ]);
