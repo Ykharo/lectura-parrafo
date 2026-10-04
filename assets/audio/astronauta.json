@@ -1,0 +1,251 @@
+{
+  "texto": "astronauta",
+  "audio": "astronauta.wav",
+  "duracion": 28.76,
+  "palabras": [
+    {
+      "palabra": "Lucas",
+      "inicio": 0.24
+    },
+    {
+      "palabra": "sueña",
+      "inicio": 0.65
+    },
+    {
+      "palabra": "con",
+      "inicio": 1.07
+    },
+    {
+      "palabra": "ser",
+      "inicio": 1.3
+    },
+    {
+      "palabra": "astronauta.",
+      "inicio": 1.54
+    },
+    {
+      "palabra": "Todas",
+      "inicio": 3.14
+    },
+    {
+      "palabra": "las",
+      "inicio": 3.47
+    },
+    {
+      "palabra": "noches",
+      "inicio": 3.65
+    },
+    {
+      "palabra": "mira",
+      "inicio": 3.98
+    },
+    {
+      "palabra": "las",
+      "inicio": 4.31
+    },
+    {
+      "palabra": "estrellas",
+      "inicio": 4.49
+    },
+    {
+      "palabra": "con",
+      "inicio": 4.96
+    },
+    {
+      "palabra": "su",
+      "inicio": 5.15
+    },
+    {
+      "palabra": "telescopio",
+      "inicio": 5.33
+    },
+    {
+      "palabra": "desde",
+      "inicio": 5.95
+    },
+    {
+      "palabra": "la",
+      "inicio": 6.27
+    },
+    {
+      "palabra": "ventana",
+      "inicio": 6.46
+    },
+    {
+      "palabra": "de",
+      "inicio": 6.93
+    },
+    {
+      "palabra": "su",
+      "inicio": 7.11
+    },
+    {
+      "palabra": "habitación.",
+      "inicio": 7.3
+    },
+    {
+      "palabra": "Ya",
+      "inicio": 8.86
+    },
+    {
+      "palabra": "conoce",
+      "inicio": 9.06
+    },
+    {
+      "palabra": "el",
+      "inicio": 9.57
+    },
+    {
+      "palabra": "nombre",
+      "inicio": 9.77
+    },
+    {
+      "palabra": "de",
+      "inicio": 10.12
+    },
+    {
+      "palabra": "varios",
+      "inicio": 10.32
+    },
+    {
+      "palabra": "planetas:",
+      "inicio": 10.67
+    },
+    {
+      "palabra": "Mercurio,",
+      "inicio": 11.87
+    },
+    {
+      "palabra": "Venus,",
+      "inicio": 12.95
+    },
+    {
+      "palabra": "Marte",
+      "inicio": 13.83
+    },
+    {
+      "palabra": "y",
+      "inicio": 14.21
+    },
+    {
+      "palabra": "Júpiter.",
+      "inicio": 14.46
+    },
+    {
+      "palabra": "Su",
+      "inicio": 16.03
+    },
+    {
+      "palabra": "favorito",
+      "inicio": 16.22
+    },
+    {
+      "palabra": "es",
+      "inicio": 17.03
+    },
+    {
+      "palabra": "Saturno,",
+      "inicio": 17.21
+    },
+    {
+      "palabra": "porque",
+      "inicio": 18.14
+    },
+    {
+      "palabra": "tiene",
+      "inicio": 18.52
+    },
+    {
+      "palabra": "unos",
+      "inicio": 18.9
+    },
+    {
+      "palabra": "anillos",
+      "inicio": 19.28
+    },
+    {
+      "palabra": "espectaculares.",
+      "inicio": 19.96
+    },
+    {
+      "palabra": "Algún",
+      "inicio": 21.55
+    },
+    {
+      "palabra": "día,",
+      "inicio": 21.88
+    },
+    {
+      "palabra": "Lucas",
+      "inicio": 22.54
+    },
+    {
+      "palabra": "quiere",
+      "inicio": 22.89
+    },
+    {
+      "palabra": "viajar",
+      "inicio": 23.23
+    },
+    {
+      "palabra": "por",
+      "inicio": 23.58
+    },
+    {
+      "palabra": "el",
+      "inicio": 23.78
+    },
+    {
+      "palabra": "espacio",
+      "inicio": 23.97
+    },
+    {
+      "palabra": "y",
+      "inicio": 24.83
+    },
+    {
+      "palabra": "descubrir",
+      "inicio": 25.01
+    },
+    {
+      "palabra": "un",
+      "inicio": 25.45
+    },
+    {
+      "palabra": "planeta",
+      "inicio": 25.63
+    },
+    {
+      "palabra": "nuevo",
+      "inicio": 26.07
+    },
+    {
+      "palabra": "para",
+      "inicio": 26.38
+    },
+    {
+      "palabra": "ponerle",
+      "inicio": 26.7
+    },
+    {
+      "palabra": "el",
+      "inicio": 27.14
+    },
+    {
+      "palabra": "nombre",
+      "inicio": 27.32
+    },
+    {
+      "palabra": "de",
+      "inicio": 27.63
+    },
+    {
+      "palabra": "su",
+      "inicio": 27.8
+    },
+    {
+      "palabra": "perro.",
+      "inicio": 27.98
+    }
+  ]
+}

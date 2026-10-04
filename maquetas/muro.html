@@ -1,0 +1,762 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <title>Maqueta · Muro de palabras</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: #000;
+      color: #ecebe6;
+      font-family: 'Lexend', system-ui, -apple-system, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    body { display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden; }
+
+    .rotulo-maqueta {
+      padding: calc(14px + env(safe-area-inset-top)) 20px 0;
+      font-size: 12px;
+      font-weight: 300;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: #444;
+    }
+
+    /* ---------- Escena panorámica ---------- */
+    #escena { position: relative; flex: 0 0 auto; width: 100%; max-width: 1200px; margin: 3vh auto 0; }
+    #escena svg { display: block; width: 100%; height: auto; }
+    .suelo { stroke: #2a2a2a; stroke-width: 2; }
+    .ladrillo rect { fill: #000; stroke: #a8a8a8; stroke-width: 1.5; }
+    .ladrillo.liso rect { fill: url(#achurado); stroke: #6a6a6a; }
+    .ladrillo text {
+      fill: #e6e6e6;
+      font-family: 'Lexend', sans-serif;
+      font-size: 24px;
+      font-weight: 400;
+      text-anchor: middle;
+    }
+    .grieta {
+      fill: none;
+      stroke: #d8d8d8;
+      stroke-width: 1.6;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-dasharray: 1 1;
+      stroke-dashoffset: 1;
+      transition: stroke-dashoffset .28s ease-out;
+    }
+    .grieta.on { stroke-dashoffset: 0; }
+    #pj polyline, #pj circle, #pj path, #pj rect { fill: none; stroke: #f2f2f2; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+    #pj circle, #pj rect { fill: #000; }
+    #pj #visor { stroke-width: 1.8; stroke: #bdbdbd; }
+    .golpe { fill: none; stroke: #555; stroke-width: 1.5; transition: fill .3s, stroke .3s; }
+    .golpe.hecho { fill: #e6e6e6; stroke: #e6e6e6; }
+
+    /* ---------- Oración ---------- */
+    #texto {
+      flex: 1 1 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      padding: 8px 32px;
+    }
+    .oracion { max-width: 980px; font-size: clamp(24px, 3.6vw, 40px); line-height: 1.7; text-align: center; color: #6e6e6e; }
+    .oracion .objetivo { color: #fff; box-shadow: inset 0 -3px 0 #fff; transition: color .4s, box-shadow .4s; }
+    .oracion .lograda { color: #fff; font-weight: 600; box-shadow: none; animation: brillo 1.2s ease; }
+    @keyframes brillo { 0% { text-shadow: 0 0 0 transparent; } 30% { text-shadow: 0 0 18px rgba(255, 255, 255, .7); } 100% { text-shadow: 0 0 0 transparent; } }
+    .progreso { font-size: 13px; font-weight: 300; letter-spacing: .12em; text-transform: uppercase; color: #555; }
+    .indicacion { min-height: 1.4em; font-size: 17px; font-weight: 300; color: #8a8a8a; }
+
+    #final {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      background: rgba(0, 0, 0, .8);
+    }
+    #final[hidden] { display: none; }
+    #final p { margin: 0; font-size: clamp(28px, 5vw, 46px); font-weight: 600; }
+
+    /* ---------- Controles ---------- */
+    #controles {
+      flex: 0 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 10px 14px;
+      padding: 10px 16px calc(14px + env(safe-area-inset-bottom));
+      border-top: 1px solid #151515;
+      font-size: 14px;
+      color: #888;
+    }
+    button {
+      padding: 9px 16px;
+      border: 1px solid #2a2a2a;
+      border-radius: 999px;
+      background: #0d0d0d;
+      color: #ccc;
+      font: inherit;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    button.primario { background: #ecebe6; border-color: #ecebe6; color: #000; font-weight: 600; }
+    #final button { padding: 14px 28px; font-size: 18px; }
+    .seg { display: inline-flex; border: 1px solid #2a2a2a; border-radius: 999px; overflow: hidden; }
+    .seg button { border: 0; border-radius: 0; background: transparent; }
+    .seg button.on { background: #ecebe6; color: #000; }
+    [hidden] { display: none !important; }
+
+    @media (max-width: 600px) {
+      #texto { padding: 8px 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="rotulo-maqueta">Maqueta · Muro de palabras · El astronauta curioso</div>
+
+  <section id="escena">
+    <svg id="svg" viewBox="0 0 1000 260" aria-hidden="true">
+      <defs>
+        <pattern id="achurado" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(45)">
+          <line x1="0" y1="0" x2="0" y2="7" stroke="#333" stroke-width="1"/>
+        </pattern>
+      </defs>
+      <line class="suelo" x1="20" x2="980" y1="226" y2="226"/>
+      <g id="golpes">
+        <circle class="golpe" cx="920" cy="28" r="6"/>
+        <circle class="golpe" cx="942" cy="28" r="6"/>
+        <circle class="golpe" cx="964" cy="28" r="6"/>
+      </g>
+      <g id="muro"><g id="ladrillos"></g><g id="grietas"></g></g>
+      <g id="chispas"></g>
+      <g id="pj">
+        <polyline id="piernaB"/><polyline id="brazoB"/>
+        <rect id="mochila" width="7" height="14" rx="2"/>
+        <polyline id="torso"/><circle id="cabeza" r="10"/><path id="visor"/>
+        <polyline id="piernaA"/><polyline id="brazoA"/>
+      </g>
+      <g id="mareo"></g>
+    </svg>
+  </section>
+
+  <section id="texto">
+    <div class="progreso" id="progreso"></div>
+    <div class="oracion" id="oracion"></div>
+    <div class="indicacion" id="indicacion"></div>
+  </section>
+
+  <nav id="controles">
+    <div class="seg" id="seg-modo">
+      <button data-modo="auto" class="on">Auto</button>
+      <button data-modo="manual">Manual</button>
+      <button data-modo="mic">Micrófono</button>
+    </div>
+    <button id="btn-leer" class="primario" hidden>▶ Leí la palabra</button>
+    <button id="btn-mic" class="primario" hidden>🎤 Empezar</button>
+    <button id="reiniciar">↺ Reiniciar</button>
+  </nav>
+
+  <div id="final" hidden>
+    <p>¡Rompiste los 5 muros!</p>
+    <button id="otra-vez" class="primario">Otra vez</button>
+  </div>
+
+  <script src="../js/analisis.js"></script>
+  <script>
+  'use strict';
+
+  const { silabas, dificultad, normalizar, parecidas } = window.Analisis;
+
+  const TEXTO =
+    'Lucas sueña con ser astronauta. Todas las noches mira las estrellas con su telescopio desde la ventana de su habitación. ' +
+    'Ya conoce el nombre de varios planetas: Mercurio, Venus, Marte y Júpiter. Su favorito es Saturno, porque tiene unos ' +
+    'anillos espectaculares. Algún día, Lucas quiere viajar por el espacio y descubrir un planeta nuevo para ponerle el nombre de su perro.';
+  const CANTIDAD = 5;   // palabras a practicar
+  const GOLPES = 3;     // lecturas para romper cada muro
+  const IDIOMA = 'es-CL';
+
+  // Escena (viewBox 1000 × 260)
+  const SUELO = 225;
+  const FILA = 46;      // alto de cada hilera de ladrillos
+  const HUECO = 4;
+  const MURO_DER = 520; // cara derecha del muro, donde choca el astronauta
+  const X_INICIO = 880;
+  const ESCALA = 1.25;
+
+  const $ = (id) => document.getElementById(id);
+  const NS = 'http://www.w3.org/2000/svg';
+  const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+  // ================= Palabras difíciles del texto =================
+  const oraciones = TEXTO.match(/[^.!?]+[.!?]/g).map((o) => o.trim());
+  const candidatas = [];
+  oraciones.forEach((o, n) => o.split(/\s+/).forEach((bruta, k) => {
+    const limpia = bruta.replace(/[^\p{L}]/gu, '');
+    candidatas.push({ limpia, norm: normalizar(limpia), puntos: dificultad(limpia), oracion: n, indice: k, orden: candidatas.length });
+  }));
+  const vistas = new Set();
+  const LISTA = candidatas
+    .filter((c) => !vistas.has(c.norm) && vistas.add(c.norm))
+    .sort((a, b) => b.puntos - a.puntos)
+    .slice(0, CANTIDAD)
+    .sort((a, b) => a.orden - b.orden)
+    .map((c) => ({ ...c, silabas: silabas(c.limpia) }));
+
+  // ================= Estado =================
+  let indice = 0;           // palabra actual
+  let golpes = 0;
+  let ladrillos = [];
+  let chispas = [];
+  let pj = null;
+  let pendiente = false;    // lectura hecha mientras el astronauta aún no estaba listo
+  let modo = 'auto';
+  let gen = 0;
+  let sacudida = 0;         // tiempo desde el último golpe (para la vibración del muro)
+  let reloj = 0;
+
+  // ================= Muro de ladrillos-sílaba =================
+  function construirMuro(sils) {
+    const $l = $('ladrillos');
+    $l.innerHTML = '';
+    $('grietas').innerHTML = '';
+    ladrillos = [];
+    const anchos = sils.map((s) => 30 + s.length * 15);
+    const total = anchos.reduce((a, b) => a + b, 0) + HUECO * (sils.length - 1);
+    const izq = MURO_DER - total;
+
+    // Hilera de abajo: una sílaba por ladrillo
+    let x = izq;
+    const centros = [];
+    const juntasAbajo = []; // x de las juntas entre sílabas
+    sils.forEach((s, k) => {
+      ladrillos.push(crearLadrillo(x, SUELO - FILA, anchos[k], FILA - 2, s));
+      centros.push(x + anchos[k] / 2);
+      x += anchos[k] + HUECO;
+      if (k < sils.length - 1) juntasAbajo.push(x - HUECO / 2);
+    });
+    // Hilera de arriba: ladrillos lisos trabados (sus juntas caen al centro de los de abajo)
+    const juntas = sils.length > 2 ? [izq, ...centros.slice(1, -1), MURO_DER] : [izq, (izq + MURO_DER) / 2, MURO_DER];
+    for (let k = 0; k < juntas.length - 1; k++) {
+      const a = juntas[k] + (k ? HUECO / 2 : 0);
+      const b = juntas[k + 1] - (k < juntas.length - 2 ? HUECO / 2 : 0);
+      ladrillos.push(crearLadrillo(a, SUELO - 2 * FILA - 1, b - a, FILA - 2, null));
+    }
+
+    // Entran cayendo desde arriba, de a uno
+    ladrillos.forEach((l, k) => { l.modo = 'cae'; l.t = -k * 0.05; l.oy = -260; });
+    return { izq, total, juntasAbajo };
+  }
+
+  function crearLadrillo(x, y, w, h, silaba) {
+    const g = document.createElementNS(NS, 'g');
+    g.setAttribute('class', silaba ? 'ladrillo' : 'ladrillo liso');
+    g.innerHTML = `<rect x="0" y="0" width="${w}" height="${h}" rx="3"/>` +
+      (silaba ? `<text x="${w / 2}" y="${h / 2}" dy=".35em">${esc(silaba)}</text>` : '');
+    $('ladrillos').appendChild(g);
+    return { g, rect: g.querySelector('rect'), x, y, w, h, silaba, ox: 0, oy: 0, rot: 0, op: 1, modo: 'quieto', t: 0 };
+  }
+
+  let muro = null; // { izq, total, juntasAbajo }
+
+  // ---------- Grietas ----------
+  function zigzagVertical(x, y1, y2, amp) {
+    let d = `M${x.toFixed(1)},${y1.toFixed(1)}`;
+    const pasos = 6;
+    for (let k = 1; k <= pasos; k++) {
+      const y = y1 + ((y2 - y1) * k) / pasos;
+      d += ` L${(x + (k % 2 ? amp : -amp) * (k < pasos ? 1 : 0.3)).toFixed(1)},${y.toFixed(1)}`;
+    }
+    return d;
+  }
+
+  // Grieta principal desde el punto del golpe hacia la izquierda, con ramas cortas.
+  // Se mantiene cerca de y0 (± margen) para no tapar las sílabas.
+  function grietaDesdeImpacto(largo, y0, retraso = 0, margen = 10) {
+    let x = MURO_DER - 1;
+    let y = y0;
+    const puntos = [[x, y]];
+    while (x > MURO_DER - largo) {
+      x -= 12 + Math.random() * 18;
+      y += (Math.random() - 0.5) * 14;
+      y = Math.min(y0 + margen, Math.max(y0 - margen, y));
+      puntos.push([x, y]);
+    }
+    agregarGrieta('M' + puntos.map(([a, b]) => `${a.toFixed(1)},${b.toFixed(1)}`).join(' L'), retraso);
+    for (let k = 2; k < puntos.length - 1; k += 3) {
+      const [a, b] = puntos[k];
+      const sentido = Math.random() < 0.5 ? -1 : 1;
+      const d = `M${a.toFixed(1)},${b.toFixed(1)} L${(a - 8 - Math.random() * 8).toFixed(1)},${(b + sentido * (8 + Math.random() * 8)).toFixed(1)} ` +
+        `L${(a - 14 - Math.random() * 10).toFixed(1)},${(b + sentido * (14 + Math.random() * 6)).toFixed(1)}`;
+      agregarGrieta(d, retraso + 0.12 + k * 0.03);
+    }
+  }
+
+  function agregarGrieta(d, retraso = 0) {
+    const p = document.createElementNS(NS, 'path');
+    p.setAttribute('class', 'grieta');
+    p.setAttribute('pathLength', '1');
+    p.setAttribute('d', d);
+    p.style.transitionDelay = `${retraso}s`;
+    $('grietas').appendChild(p);
+    p.getBoundingClientRect(); // fija el estado inicial para que la transición se vea
+    p.classList.add('on');
+  }
+
+  function agrietar(n) {
+    const ancho = muro.total;
+    const silabicos = ladrillos.filter((l) => l.silaba);
+    if (n === 1) {
+      // Se abren las juntas entre sílabas y nace una grieta desde el golpe
+      muro.juntasAbajo.forEach((x, k) => agregarGrieta(zigzagVertical(x, SUELO - FILA + 3, SUELO - 3, 3.5), 0.1 + 0.05 * k));
+      grietaDesdeImpacto(ancho * 0.4, SUELO - FILA - 22, 0, 6);
+      silabicos.forEach((l, k) => { l.ox = (k - (silabicos.length - 1) / 2) * 1.5; });
+    } else if (n === 2) {
+      // Las grietas suben a la hilera de arriba y aparecen ramas nuevas
+      muro.juntasAbajo.forEach((x, k) => agregarGrieta(zigzagVertical(x, SUELO - FILA, SUELO - 2 * FILA + 3, 5), 0.1 + 0.05 * k));
+      grietaDesdeImpacto(ancho * 0.75, SUELO - FILA - 14, 0, 8);
+      // los ladrillos se separan más y los del lado del golpe se tuercen
+      silabicos.forEach((l, k) => { l.ox = (k - (silabicos.length - 1) / 2) * 4; });
+      ladrillos.filter((l) => l.x + l.w > MURO_DER - 70).forEach((l) => { l.rot = -0.035; l.ox -= 2; });
+    }
+  }
+
+  function lanzarChispas(cantidad, fuerza) {
+    for (let i = 0; i < cantidad; i++) {
+      chispas.push({
+        x: MURO_DER + 2, y: SUELO - 50 + (Math.random() - 0.5) * 30,
+        vx: 40 + Math.random() * 160 * fuerza, vy: -60 - Math.random() * 160 * fuerza,
+        rot: Math.random() * 6.3, vr: (Math.random() - 0.5) * 14,
+        vida: 0.7 + Math.random() * 0.6, tipo: 'chispa',
+      });
+    }
+  }
+
+  function lanzarEstrellas(x, y) {
+    const grises = ['#ffffff', '#c8c8c8', '#8a8a8a'];
+    for (let i = 0; i < 28; i++) {
+      const ang = Math.random() * Math.PI * 2;
+      const vel = 40 + Math.random() * 110;
+      chispas.push({
+        x, y, vx: Math.cos(ang) * vel, vy: Math.sin(ang) * vel - 40,
+        tam: 2.5 + Math.random() * 3, fase: Math.random() * 6.3,
+        c: grises[i % 3], vida: 2 + Math.random() * 1.5, tipo: 'estrella',
+      });
+    }
+  }
+
+  // ---------- Romper (tercer golpe) ----------
+  function romper() {
+    $('grietas').style.opacity = '0';
+    for (const l of ladrillos) {
+      l.modo = 'vuela';
+      l.t = 0;
+      l.vx = -(90 + Math.random() * 220) * (0.6 + (l.x - muro.izq) / muro.total);
+      l.vy = -(120 + Math.random() * 200);
+      l.vr = (Math.random() - 0.5) * 7;
+    }
+    lanzarChispas(18, 1.4);
+    const g = gen;
+    setTimeout(() => { if (g === gen) armarPalabra(); }, 1150);
+  }
+
+  // Las sílabas vuelan a juntarse y forman la palabra completa
+  function armarPalabra() {
+    const sils = ladrillos.filter((l) => l.silaba);
+    const anchos = sils.map((l) => l.g.querySelector('text').getComputedTextLength());
+    const total = anchos.reduce((a, b) => a + b, 0);
+    let x = 560 - total / 2;
+    sils.forEach((l, k) => {
+      const cx = x + anchos[k] / 2;
+      x += anchos[k];
+      Object.assign(l, {
+        modo: 'arma', t: 0,
+        sx: l.ox, sy: l.oy, sr: l.rot,
+        tx: cx - l.w / 2 - l.x, ty: 95 - l.h / 2 - l.y,
+      });
+    });
+    const g = gen;
+    setTimeout(() => {
+      if (g !== gen) return;
+      // la palabra baja a su lugar en la oración
+      sils.forEach((l) => { l.modo = 'baja'; l.t = 0; });
+      const el = $('oracion').querySelector('.objetivo');
+      if (el) { el.classList.remove('objetivo'); el.classList.add('lograda'); }
+    }, 1900);
+    setTimeout(() => { if (g === gen) siguientePalabra(); }, 3600);
+  }
+
+  // ================= Astronauta =================
+  const pts = (arr) => arr.map((p) => p.join(',')).join(' ');
+
+  // Poses en coordenadas locales: origen = pies, y negativa hacia arriba, mirando hacia +x.
+  function pose(m, a, t) {
+    if (m === 'agachado') {
+      const r = Math.sin(t * 3) * 0.6;
+      return {
+        cabeza: [9, -46 + r], torso: [[0, -15], [6, -35 + r]],
+        brazoA: [[5, -31], [11, -22], [15, -14]], brazoB: [[5, -31], [7, -21], [10, -13]],
+        piernaA: [[0, -15], [8, -9], [4, 0]], piernaB: [[0, -15], [-5, -8], [-10, 0]],
+      };
+    }
+    if (m === 'corriendo') {
+      const s = Math.sin(a);
+      return {
+        dy: -Math.abs(Math.cos(a)) * 4,
+        cabeza: [9, -53], torso: [[0, -21], [6, -42]],
+        brazoA: [[5, -38], [5 - 8 * s, -30], [10 - 6 * s, -24]], brazoB: [[5, -38], [5 + 8 * s, -30], [10 + 6 * s, -24]],
+        piernaA: [[0, -21], [3 + 9 * s, -11], [14 * s, -1 - 3 * Math.max(0, s)]],
+        piernaB: [[0, -21], [3 - 9 * s, -11], [-14 * s, -1 - 3 * Math.max(0, -s)]],
+      };
+    }
+    if (m === 'rebote') {
+      return {
+        cabeza: [-6, -52], torso: [[0, -22], [-4, -43]],
+        brazoA: [[-3, -39], [6, -47], [12, -52]], brazoB: [[-3, -39], [-10, -46], [-14, -52]],
+        piernaA: [[0, -22], [7, -13], [10, -4]], piernaB: [[0, -22], [3, -12], [5, -2]],
+      };
+    }
+    if (m === 'celebrando') {
+      const h = Math.abs(Math.sin(t * 3.2));
+      const f = (1 - h) * 5;
+      return {
+        dy: -h * 30,
+        cabeza: [0, -55], torso: [[0, -22], [0, -44]],
+        brazoA: [[0, -40], [9, -50], [13, -61]], brazoB: [[0, -40], [-9, -50], [-13, -61]],
+        piernaA: [[0, -22], [4 + f, -11], [4, 0]], piernaB: [[0, -22], [-4 + f, -11], [-4, 0]],
+      };
+    }
+    // caminando / parado / mareado
+    const s = m === 'caminando' ? Math.sin(a) : 0;
+    const vaiven = m === 'mareado' ? Math.sin(t * 7) * 2.5 : 0;
+    return {
+      dy: m === 'caminando' ? -Math.abs(Math.cos(a)) * 2 : Math.sin(t * 2) * 0.6,
+      cabeza: [1 + vaiven, -55], torso: [[0, -22], [1 + vaiven * 0.6, -44]],
+      brazoA: [[1, -40], [-4 * s + 1, -31], [-7 * s + 2, -24]], brazoB: [[1, -40], [4 * s + 1, -31], [7 * s + 2, -24]],
+      piernaA: [[0, -22], [5 * s + 2, -11], [9 * s, 0]], piernaB: [[0, -22], [-5 * s + 2, -11], [-9 * s, 0]],
+    };
+  }
+
+  function prepararPj() {
+    pj = { x: X_INICIO, y: SUELO, dir: -1, modo: 'agachado', anim: 0, t: 0 };
+    listo();
+  }
+
+  // El astronauta queda agachado, listo para correr
+  function listo() {
+    pj.modo = 'agachado';
+    pj.dir = -1;
+    pj.x = X_INICIO;
+    $('indicacion').textContent = golpes === 0 ? 'Lee la palabra en voz alta' : '¡Otra vez!';
+    const g = gen;
+    if (pendiente) { pendiente = false; setTimeout(() => { if (g === gen) correr(); }, 250); return; }
+    if (modo === 'auto') setTimeout(() => { if (g === gen) leer(); }, 900 + Math.random() * 600);
+  }
+
+  function leer() {
+    if (indice >= LISTA.length || golpes >= GOLPES) return;
+    if (pj.modo === 'agachado') correr();
+    else pendiente = true;
+  }
+
+  function correr() {
+    pj.modo = 'corriendo';
+    pj.t = 0;
+    $('indicacion').textContent = '';
+  }
+
+  function impacto() {
+    golpes++;
+    sacudida = 0;
+    document.querySelectorAll('.golpe').forEach((c, k) => c.classList.toggle('hecho', k < golpes));
+    if (golpes < GOLPES) {
+      agrietar(golpes);
+      lanzarChispas(6 + golpes * 4, 1);
+      pj.modo = 'rebote';
+      pj.t = 0;
+      pj.x0 = pj.x;
+    } else {
+      romper();
+      pj.modo = 'atraviesa';
+      pj.vel = 900;
+    }
+  }
+
+  function actualizarPj(dt) {
+    pj.t += dt;
+    switch (pj.modo) {
+      case 'corriendo': {
+        const avance = 1300 * dt;
+        pj.x -= avance;
+        pj.anim += avance * 0.09;
+        if (pj.x <= MURO_DER + 12) { pj.x = MURO_DER + 12; impacto(); }
+        break;
+      }
+      case 'rebote': {
+        // sale despedido hacia atrás en arco
+        const p = Math.min(1, pj.t / 0.45);
+        pj.x = pj.x0 + 120 * p;
+        pj.y = SUELO - 38 * Math.sin(Math.PI * p);
+        if (p >= 1) { pj.y = SUELO; pj.modo = 'mareado'; pj.t = 0; }
+        break;
+      }
+      case 'mareado':
+        if (pj.t > 0.9) { pj.modo = 'caminando'; pj.dir = 1; }
+        break;
+      case 'caminando': {
+        const avance = Math.min(X_INICIO - pj.x, 430 * dt);
+        pj.x += avance;
+        pj.anim += avance * 0.13;
+        if (pj.x >= X_INICIO - 0.5) listo();
+        break;
+      }
+      case 'atraviesa': {
+        pj.vel = Math.max(160, pj.vel - 900 * dt);
+        const avance = pj.vel * dt;
+        pj.x -= avance;
+        pj.anim += avance * 0.09;
+        if (pj.x <= 250) {
+          pj.modo = 'celebrando';
+          pj.dir = 1;
+          pj.t = 0;
+          lanzarEstrellas(pj.x, SUELO - 70);
+          $('indicacion').textContent = '¡Muro roto!';
+        }
+        break;
+      }
+    }
+  }
+
+  // ================= Bucle de animación =================
+  let ultimo = performance.now();
+
+  function cuadro(ahora) {
+    const dt = Math.min(0.05, (ahora - ultimo) / 1000);
+    ultimo = ahora;
+    reloj += dt;
+    sacudida += dt;
+
+    actualizarPj(dt);
+
+    // vibración del muro tras cada golpe
+    const vib = sacudida < 0.4 ? Math.sin(sacudida * 70) * 4 * Math.exp(-sacudida * 9) : 0;
+    $('muro').setAttribute('transform', `translate(${vib.toFixed(2)} 0)`);
+
+    for (const l of ladrillos) {
+      l.t += dt;
+      if (l.modo === 'cae') {
+        const p = Math.max(0, Math.min(1, l.t / 0.4));
+        l.oy = -260 * Math.pow(1 - p, 3);
+        if (p >= 1) l.modo = 'quieto';
+      } else if (l.modo === 'vuela') {
+        l.vy += 420 * dt;
+        l.ox += l.vx * dt;
+        l.oy += l.vy * dt;
+        l.rot += l.vr * dt;
+        if (l.y + l.oy + l.h > SUELO) { l.oy = SUELO - l.h - l.y; l.vy *= -0.3; l.vx *= 0.6; l.vr *= 0.5; }
+        if (!l.silaba) l.op = Math.max(0, 1 - Math.max(0, l.t - 0.7) / 0.5);
+      } else if (l.modo === 'arma') {
+        const p = Math.min(1, l.t / 0.75);
+        const e = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+        l.ox = l.sx + (l.tx - l.sx) * e;
+        l.oy = l.sy + (l.ty - l.sy) * e;
+        l.rot = l.sr * (1 - e);
+        l.rect.style.opacity = String(1 - e);
+      } else if (l.modo === 'baja') {
+        const p = Math.min(1, l.t / 0.7);
+        l.oy = l.ty + 200 * p * p;
+        l.op = 1 - p;
+      }
+      l.g.setAttribute('opacity', l.op.toFixed(2));
+      l.g.setAttribute('transform',
+        `translate(${(l.x + l.ox).toFixed(1)} ${(l.y + l.oy).toFixed(1)}) rotate(${((l.rot * 180) / Math.PI).toFixed(1)} ${l.w / 2} ${l.h / 2})`);
+    }
+
+    // Astronauta
+    const P = pose(pj.modo, pj.anim, reloj);
+    $('pj').setAttribute('transform',
+      `translate(${pj.x.toFixed(1)} ${(pj.y + (P.dy || 0) * ESCALA).toFixed(1)}) scale(${pj.dir * ESCALA} ${ESCALA})`);
+    const [cx, cy] = P.cabeza;
+    $('cabeza').setAttribute('cx', cx);
+    $('cabeza').setAttribute('cy', cy);
+    $('visor').setAttribute('d', `M${cx + 2},${cy - 6} A6,6 0 0 1 ${cx + 2},${cy + 6}`);
+    const [nx, ny] = P.torso[1];
+    $('mochila').setAttribute('x', nx - 9);
+    $('mochila').setAttribute('y', ny + 1);
+    for (const parte of ['torso', 'brazoA', 'brazoB']) $(parte).setAttribute('points', pts(P[parte]));
+    for (const parte of ['piernaA', 'piernaB']) {
+      const pie = P[parte][P[parte].length - 1];
+      $(parte).setAttribute('points', pts([...P[parte], [pie[0] + 4, pie[1]]]));
+    }
+
+    // Estrellitas de mareo girando sobre el casco
+    if (pj.modo === 'mareado') {
+      const hx = pj.x + pj.dir * cx * ESCALA;
+      const hy = pj.y + cy * ESCALA - 22;
+      let html = '';
+      for (let k = 0; k < 3; k++) {
+        const a = reloj * 6 + (k * Math.PI * 2) / 3;
+        const x = hx + Math.cos(a) * 16;
+        const y = hy + Math.sin(a) * 5;
+        html += `<path d="M${x},${y - 3.5}V${y + 3.5}M${x - 3.5},${y}H${x + 3.5}" stroke="#d0d0d0" stroke-width="1.5" stroke-linecap="round"/>`;
+      }
+      $('mareo').innerHTML = html;
+    } else if ($('mareo').innerHTML) {
+      $('mareo').innerHTML = '';
+    }
+
+    // Chispas del golpe y estrellas de celebración
+    if (chispas.length) {
+      chispas = chispas.filter((c) => (c.vida -= dt) > 0);
+      let html = '';
+      for (const c of chispas) {
+        if (c.tipo === 'chispa') {
+          c.vy += 520 * dt;
+          c.x += c.vx * dt;
+          c.y += c.vy * dt;
+          c.rot += c.vr * dt;
+          if (c.y > SUELO) { c.y = SUELO; c.vy *= -0.3; c.vx *= 0.5; c.vr *= 0.5; }
+          const dx = Math.cos(c.rot) * 3;
+          const dy = Math.sin(c.rot) * 3;
+          html += `<line x1="${(c.x - dx).toFixed(1)}" y1="${(c.y - dy).toFixed(1)}" x2="${(c.x + dx).toFixed(1)}" y2="${(c.y + dy).toFixed(1)}" stroke="#9a9a9a" stroke-width="1.6" stroke-linecap="round" opacity="${Math.min(1, c.vida * 2).toFixed(2)}"/>`;
+        } else {
+          c.vy += 35 * dt;
+          c.x += c.vx * dt;
+          c.y += c.vy * dt;
+          c.vx *= 1 - dt * 0.6;
+          c.vy *= 1 - dt * 0.6;
+          const o = Math.min(1, c.vida) * (0.55 + 0.45 * Math.sin(reloj * 6 + c.fase));
+          html += `<path d="M${c.x.toFixed(1)},${(c.y - c.tam).toFixed(1)}V${(c.y + c.tam).toFixed(1)}M${(c.x - c.tam).toFixed(1)},${c.y.toFixed(1)}H${(c.x + c.tam).toFixed(1)}" stroke="${c.c}" stroke-width="1.6" stroke-linecap="round" opacity="${o.toFixed(2)}"/>`;
+        }
+      }
+      $('chispas').innerHTML = html;
+    }
+    requestAnimationFrame(cuadro);
+  }
+
+  // ================= Palabras y oración =================
+  function montarPalabra() {
+    const p = LISTA[indice];
+    golpes = 0;
+    pendiente = false;
+    document.querySelectorAll('.golpe').forEach((c) => c.classList.remove('hecho'));
+    $('grietas').style.opacity = '';
+    muro = construirMuro(p.silabas);
+    $('progreso').textContent = `Palabra ${indice + 1} de ${LISTA.length}`;
+    $('oracion').innerHTML = oraciones[p.oracion].split(/\s+/)
+      .map((w, k) => (k === p.indice ? `<span class="objetivo">${esc(w)}</span>` : esc(w)))
+      .join(' ');
+    mic.consumidas = mic.cantidad;
+    prepararPj();
+  }
+
+  function siguientePalabra() {
+    indice++;
+    if (indice < LISTA.length) return montarPalabra();
+    $('final').hidden = false;
+  }
+
+  function reiniciar() {
+    gen++;
+    indice = 0;
+    chispas = [];
+    $('final').hidden = true;
+    montarPalabra();
+  }
+
+  // ================= Micrófono =================
+  const Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const mic = { activo: false, rec: null, cantidad: 0, consumidas: 0 };
+
+  function micIniciar() {
+    if (!Rec) { $('indicacion').textContent = 'Este navegador no reconoce la voz. Usa Safari en el iPad.'; return; }
+    if (mic.activo) return;
+    mic.activo = true;
+    if (!mic.rec) {
+      const r = new Rec();
+      r.lang = IDIOMA;
+      r.continuous = true;
+      r.interimResults = true;
+      r.onresult = (e) => {
+        let t = '';
+        for (let i = 0; i < e.results.length; i++) t += ' ' + e.results[i][0].transcript;
+        const dichas = t.split(/\s+/).map(normalizar).filter(Boolean);
+        mic.cantidad = dichas.length;
+        if (mic.consumidas > dichas.length) mic.consumidas = dichas.length;
+        if (indice >= LISTA.length) return;
+        const objetivo = LISTA[indice].norm;
+        const nuevas = dichas.slice(mic.consumidas);
+        const leyo = nuevas.some((w, k) => parecidas(w, objetivo) || (k + 1 < nuevas.length && parecidas(w + nuevas[k + 1], objetivo)));
+        if (leyo) { mic.consumidas = dichas.length; leer(); }
+      };
+      r.onerror = (e) => {
+        if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+          mic.activo = false;
+          $('btn-mic').hidden = false;
+          $('indicacion').textContent = 'Sin permiso de micrófono. Revisa que el Dictado esté activado.';
+        }
+      };
+      r.onend = () => {
+        if (!mic.activo) return;
+        setTimeout(() => {
+          if (!mic.activo) return;
+          try { r.start(); mic.cantidad = 0; mic.consumidas = 0; } catch (err) {
+            if (err.name === 'InvalidStateError') return;
+            mic.activo = false;
+            $('btn-mic').hidden = false;
+          }
+        }, 250);
+      };
+      mic.rec = r;
+    }
+    mic.cantidad = 0;
+    mic.consumidas = 0;
+    try { mic.rec.start(); } catch { /* ya estaba escuchando */ }
+    $('btn-mic').hidden = true;
+  }
+
+  function micDetener() {
+    mic.activo = false;
+    try { mic.rec?.abort(); } catch { /* nada */ }
+  }
+
+  // ================= Controles =================
+  function cambiarModo(m) {
+    modo = m;
+    document.querySelectorAll('#seg-modo button').forEach((b) => b.classList.toggle('on', b.dataset.modo === m));
+    $('btn-leer').hidden = m === 'auto';
+    $('btn-mic').hidden = m !== 'mic' || mic.activo;
+    if (m !== 'mic') micDetener();
+    reiniciar();
+  }
+
+  $('seg-modo').addEventListener('click', (e) => { if (e.target.dataset.modo) cambiarModo(e.target.dataset.modo); });
+  $('btn-leer').addEventListener('click', leer);
+  $('btn-mic').addEventListener('click', micIniciar);
+  $('reiniciar').addEventListener('click', reiniciar);
+  $('otra-vez').addEventListener('click', reiniciar);
+  $('escena').addEventListener('click', () => { if (modo === 'manual') leer(); });
+  document.addEventListener('keydown', (e) => {
+    if (modo !== 'auto' && (e.key === ' ' || e.key === 'ArrowRight')) { e.preventDefault(); leer(); }
+  });
+
+  reiniciar();
+  requestAnimationFrame(cuadro);
+  </script>
+</body>
+</html>

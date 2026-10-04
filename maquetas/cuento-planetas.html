@@ -348,12 +348,61 @@
     tiempos.forEach((ms, i) => setTimeout(() => { if (g === gen) hasta(i); }, ms));
   }
 
-  // ---------- 1. Voz adulta (la voz del iPad hace de grabación) ----------
+  // ---------- 1. Voz adulta: grabación del texto completo + tiempos por palabra ----------
+  // assets/audio/astronauta.json se genera con herramientas/sincronizar.js
+  let grabacionAdulta = null; // { url, inicios[], desde, hasta }
+  fetch('../assets/audio/astronauta.json')
+    .then((r) => r.json())
+    .then((j) => {
+      const norms = j.palabras.map((p) => normalizar(p.palabra));
+      const k = norms.findIndex((_, i) => esperadas.every((e, q) => norms[i + q] === e));
+      if (k < 0) return;
+      const inicios = esperadas.map((_, q) => j.palabras[k + q].inicio);
+      const siguiente = j.palabras[k + N];
+      grabacionAdulta = {
+        url: new URL(`../assets/audio/${j.audio}`, location.href).href,
+        inicios,
+        desde: Math.max(0, inicios[0] - 0.15),
+        hasta: siguiente ? siguiente.inicio - 0.3 : j.duracion,
+      };
+      $audio.preload = 'auto';
+      $audio.src = grabacionAdulta.url;
+    })
+    .catch(() => { /* sin grabación: se usa la voz del iPad */ });
+
   function vozAdulta() {
+    if (!grabacionAdulta) return vozSintetica();
     const g = cancelar();
     reiniciarEscena();
     hasta(-1);
-    estado('Voz adulta simulada con la voz del iPad (en la app sería una grabación real).');
+    const { url, inicios, desde, hasta: fin } = grabacionAdulta;
+    if ($audio.src !== url) $audio.src = url;
+    const empezar = () => { $audio.currentTime = desde; };
+    if ($audio.readyState >= 1) empezar();
+    else $audio.addEventListener('loadedmetadata', empezar, { once: true });
+    $audio.play().catch(() => estado('No se pudo reproducir la grabación.'));
+    estado('Voz adulta grabada.');
+    const tic = () => {
+      if (g !== gen) return;
+      const t = $audio.currentTime;
+      let i = actual;
+      while (i + 1 < N && inicios[i + 1] <= t) i++;
+      if (i > actual) hasta(i);
+      if (t >= fin || $audio.ended) {
+        $audio.pause();
+        return terminar(g);
+      }
+      requestAnimationFrame(tic);
+    };
+    requestAnimationFrame(tic);
+  }
+
+  // Respaldo: la voz del iPad, si no está la grabación
+  function vozSintetica() {
+    const g = cancelar();
+    reiniciarEscena();
+    hasta(-1);
+    estado('Voz del iPad (no se encontró la grabación en assets/audio).');
     if (!('speechSynthesis' in window)) {
       seguirLinea(g, estimarTiempos(200));
       setTimeout(() => terminar(g), estimarTiempos(200)[N - 1] + 900);

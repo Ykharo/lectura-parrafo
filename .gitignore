@@ -43,6 +43,7 @@ fuentes/
 *.fla
 *.sketch
 *.wav
+!assets/audio/*.wav
 *.aiff
 *.mov
 *.zip

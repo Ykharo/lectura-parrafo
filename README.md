@@ -27,7 +27,16 @@ assets/            imágenes, sonidos y animaciones livianas (futuro)
 ## Maquetas
 
 - `maquetas/escalera.html`: prueba de la animación para la etapa Frases (escalera que se materializa con cada repetición y un personaje que la recorre). Modos: Auto (simula la lectura), Manual (una palabra por toque) y Micrófono.
+- `maquetas/muro.html`: práctica de las 5 palabras difíciles del astronauta. Cada palabra es un muro de ladrillos-sílaba; cada lectura es un choque del astronauta (grietas → más grietas → se rompe), y la palabra rearmada baja a su oración.
 - `maquetas/cuento-planetas.html`: escena 3 de «El astronauta curioso» animada en líneas, sincronizada palabra por palabra con una voz adulta (simulada con la voz del iPad), una lectura infantil simulada o una grabación real de la niña (experimental).
+
+## Audio con voz adulta
+
+- `assets/audio/<texto>.wav`: lectura grabada del texto completo.
+- `assets/audio/<texto>.json`: cuándo empieza cada palabra (en segundos).
+- `herramientas/generar_audio.py`: genera la lectura con la voz de Gemini (requiere `pip install google-genai` y la variable `GEMINI_API_KEY`; la clave nunca se guarda en el proyecto).
+- `herramientas/sincronizar.js`: calcula los tiempos por palabra a partir de las pausas del audio y la puntuación del texto:
+  `node herramientas/sincronizar.js astronauta assets/audio/astronauta.wav`
 
 ## Probar en el PC
 
