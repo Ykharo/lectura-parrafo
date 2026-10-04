@@ -1,0 +1,11 @@
+# Finales de línea uniformes entre Windows y otros sistemas
+* text=auto eol=lf
+
+# Binarios: nunca convertir
+*.png binary
+*.jpg binary
+*.webp binary
+*.gif binary
+*.mp3 binary
+*.ogg binary
+*.woff2 binary

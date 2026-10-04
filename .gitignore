@@ -1,0 +1,54 @@
+# ---- Sistema operativo ----
+.DS_Store
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# ---- Editores ----
+.vscode/
+.idea/
+*.swp
+*.tmp
+
+# ---- Dependencias y compilados (si en el futuro se usa npm, Vite, Phaser, etc.) ----
+node_modules/
+dist/
+build/
+.cache/
+.parcel-cache/
+.vite/
+coverage/
+
+# ---- Secretos y variables de entorno ----
+.env
+.env.*
+!.env.example
+
+# ---- Registros ----
+*.log
+npm-debug.log*
+yarn-error.log*
+
+# ---- Archivos fuente de diseño pesados ----
+# Guarda aquí los originales (Photoshop, After Effects, audio sin comprimir…)
+# y sube a assets/ solo las versiones livianas (png, webp, svg, mp3, ogg, json de Lottie).
+fuentes/
+*.psd
+*.ai
+*.aep
+*.prproj
+*.blend
+*.kra
+*.xcf
+*.fla
+*.sketch
+*.wav
+*.aiff
+*.mov
+*.zip
+
+# ---- Respaldos exportados desde la app (contienen el historial de la niña) ----
+lectura-respaldo-*.json
+
+# ---- Claude Code (configuración local) ----
+.claude/settings.local.json

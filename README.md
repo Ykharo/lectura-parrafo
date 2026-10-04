@@ -1,0 +1,45 @@
+# Lectura de párrafos
+
+Aplicación web para practicar lectura en voz alta (español de Chile, nivel ~9 años), pensada para Safari en iPad.
+
+## Cómo funciona
+
+0. **Elegir texto**: 6 textos incluidos, más los que se agreguen con «+ Agregar texto».
+1. **Mirar**: el párrafo con las palabras difíciles en dorado. Tocar una palabra la agrega o la quita (queda guardado).
+2. **Practicar**: cada palabra difícil, grande y separada en sílabas. Avanza sola al reconocerla (2 rondas). «🔊 Escuchar» la pronuncia.
+3. **Leer**: el párrafo completo; cada palabra se pinta verde al leerla (naranja si se saltó). Al final: tiempo, palabras por minuto y palabras para repasar.
+
+El **historial** guarda cada lectura en el iPad. Desde ahí se puede exportar o importar un respaldo (`.json`).
+
+## Estructura
+
+```
+index.html
+css/styles.css     diseño (fondo negro, tipografía Lexend)
+js/analisis.js     sílabas, puntaje de dificultad, comparación de palabras
+js/almacen.js      textos propios, palabras difíciles e historial (localStorage)
+js/textos.js       textos incluidos — agrega más aquí
+js/app.js          pantallas, etapas y reconocimiento de voz (configuración al inicio)
+assets/            imágenes, sonidos y animaciones livianas (futuro)
+```
+
+## Probar en el PC
+
+```
+npx serve
+```
+
+Abrir la dirección que muestra en Chrome (abrir `index.html` con doble clic no permite usar el micrófono).
+
+## Publicar en GitHub Pages
+
+1. Publicar el repositorio como **público**.
+2. En GitHub: **Settings → Pages → Build and deployment**: *Deploy from a branch*, rama `main`, carpeta `/ (root)`, **Save**.
+3. Queda en `https://<usuario>.github.io/<repositorio>/` (tarda 1–2 minutos en cada cambio).
+
+## Requisitos en el iPad
+
+- Abrir en **Safari**.
+- **Dictado activado**: Ajustes → General → Teclado → Activar Dictado.
+- Aceptar el permiso del micrófono.
+- El historial y los textos agregados viven en ese iPad y ese navegador: borrar los datos de Safari los elimina. Exporta un respaldo de vez en cuando.
