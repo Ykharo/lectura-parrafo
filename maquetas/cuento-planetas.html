@@ -1,0 +1,573 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <title>Maqueta · Cuento, escena 3</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: #000;
+      color: #ecebe6;
+      font-family: 'Lexend', system-ui, -apple-system, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    body { display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden; }
+
+    /* ---------- Escena ---------- */
+    #escena { position: relative; flex: 1 1 62%; min-height: 0; }
+    #escena svg { display: block; width: 100%; height: 100%; }
+    .rotulo-maqueta {
+      position: absolute;
+      top: calc(14px + env(safe-area-inset-top));
+      left: 20px;
+      font-size: 12px;
+      font-weight: 300;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: #444;
+    }
+
+    /* Trazos que se dibujan solos (pathLength = 1) */
+    .trazo {
+      fill: none;
+      stroke: #d4d4d4;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-dasharray: 1 1;
+      stroke-dashoffset: 1;
+      transition: stroke-dashoffset .9s ease;
+    }
+    .trazo.on { stroke-dashoffset: 0; }
+    .trazo.tenue { stroke: #6a6a6a; stroke-width: 1.5; }
+    .trazo.fino { stroke-width: 1.5; stroke: #9a9a9a; }
+    .cuerpo { fill: #000; }
+
+    .aparece { opacity: 0; transition: opacity .8s ease; }
+    .aparece.on { opacity: 1; }
+    .fantasma { fill: none; stroke: #5a5a5a; stroke-width: 1.2; stroke-dasharray: 3 5; }
+    .fantasma.on { opacity: .8; }
+    .off { opacity: 0 !important; }
+    .rotulo {
+      fill: #8f8f8f;
+      font-family: 'Lexend', sans-serif;
+      font-size: 14px;
+      font-weight: 300;
+      letter-spacing: .14em;
+      text-anchor: middle;
+      text-transform: uppercase;
+    }
+    .estrella { fill: #8a8a8a; }
+    .puntero { fill: #8a8a8a; }
+    .sin-trans, .sin-trans * { transition: none !important; }
+
+    /* Al terminar: los planetas flotan y las estrellas titilan */
+    .final .flota { animation: flotar 4.5s ease-in-out infinite; animation-delay: var(--f, 0s); transform-box: fill-box; }
+    .final .estrella { animation: titilar 3s ease-in-out infinite; animation-delay: var(--f, 0s); }
+    @keyframes flotar { 50% { transform: translateY(-5px); } }
+    @keyframes titilar { 50% { opacity: .25; } }
+
+    /* ---------- Texto ---------- */
+    #texto {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 22%;
+      padding: 4px 32px 16px;
+    }
+    .linea { max-width: 980px; font-size: clamp(26px, 4vw, 42px); line-height: 1.7; text-align: center; }
+    .w { color: #d9d9d9; transition: color .25s, box-shadow .25s; padding: 0 .04em; }
+    .w.leida { color: #6e6e6e; }
+    .w.actual { color: #fff; box-shadow: inset 0 -3px 0 #fff; }
+    .corte { margin: 0 .1em; font-weight: 300; color: #333; }
+
+    /* ---------- Controles ---------- */
+    #controles {
+      flex: 0 0 auto;
+      padding: 10px 16px calc(12px + env(safe-area-inset-bottom));
+      border-top: 1px solid #151515;
+      text-align: center;
+    }
+    .botones { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+    button {
+      padding: 12px 22px;
+      border: 1px solid #2a2a2a;
+      border-radius: 999px;
+      background: #0d0d0d;
+      color: #ccc;
+      font: inherit;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button.primario { background: #ecebe6; border-color: #ecebe6; color: #000; font-weight: 600; }
+    button.grabando { border-color: #e5484d; color: #e5484d; }
+    button:disabled { opacity: .35; cursor: default; }
+    #estado { min-height: 1.4em; margin: 10px 0 0; font-size: 13px; font-weight: 300; color: #777; }
+
+    @media (max-width: 600px) {
+      #texto { padding: 4px 16px 12px; }
+      button { padding: 10px 16px; font-size: 14px; }
+    }
+  </style>
+</head>
+<body>
+  <section id="escena">
+    <div class="rotulo-maqueta">Maqueta · El astronauta curioso · Escena 3</div>
+    <svg id="svg" viewBox="0 0 1000 520" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+      <!-- data-p = índice de la palabra que dibuja el elemento (-1 = antes de empezar)
+           data-d = retraso en segundos · data-dur = duración del trazo · data-hasta = desaparece en esa palabra -->
+
+      <g id="estrellas"></g>
+
+      <!-- Horizonte de la Tierra -->
+      <path class="trazo tenue" data-p="-1" data-dur="1.4" pathLength="1" d="M20,474 Q170,452 330,476"/>
+
+      <!-- Sol (palabra "varios") -->
+      <circle class="trazo fino" data-p="5" data-dur="1.6" pathLength="1" cx="-60" cy="40" r="150"/>
+      <line class="trazo fino" data-p="5" data-d=".6" pathLength="1" x1="105" y1="40" x2="125" y2="40"/>
+      <line class="trazo fino" data-p="5" data-d=".75" pathLength="1" x1="95" y1="96" x2="114" y2="103"/>
+      <line class="trazo fino" data-p="5" data-d=".9" pathLength="1" x1="66" y1="146" x2="82" y2="159"/>
+      <line class="trazo fino" data-p="5" data-d="1.05" pathLength="1" x1="22" y1="183" x2="32" y2="200"/>
+
+      <!-- Órbita (palabra "planetas") -->
+      <path class="trazo tenue" data-p="6" data-dur="1.6" pathLength="1" d="M110,150 Q480,330 960,200"/>
+
+      <!-- Mercurio -->
+      <g class="flota" style="--f:0s">
+        <circle class="trazo cuerpo" data-p="7" pathLength="1" cx="247" cy="205" r="11"/>
+        <circle class="trazo fino" data-p="7" data-d=".5" pathLength="1" cx="243" cy="202" r="2.2"/>
+        <circle class="trazo fino" data-p="7" data-d=".65" pathLength="1" cx="251" cy="209" r="1.6"/>
+        <text class="rotulo aparece" data-p="7" data-d=".3" x="247" y="244">Mercurio</text>
+      </g>
+
+      <!-- Venus -->
+      <g class="flota" style="--f:-1.2s">
+        <circle class="trazo cuerpo" data-p="8" pathLength="1" cx="391" cy="239" r="19"/>
+        <path class="trazo fino" data-p="8" data-d=".5" pathLength="1" d="M378,234 q8,-6 18,-1"/>
+        <path class="trazo fino" data-p="8" data-d=".65" pathLength="1" d="M381,246 q9,5 19,-2"/>
+        <text class="rotulo aparece" data-p="8" data-d=".3" x="391" y="286">Venus</text>
+      </g>
+
+      <!-- Marte -->
+      <g class="flota" style="--f:-2.3s">
+        <circle class="trazo cuerpo" data-p="9" pathLength="1" cx="559" cy="254" r="15"/>
+        <path class="trazo fino" data-p="9" data-d=".5" pathLength="1" d="M551,243 q8,-5 16,0"/>
+        <circle class="trazo fino" data-p="9" data-d=".65" pathLength="1" cx="563" cy="258" r="3"/>
+        <text class="rotulo aparece" data-p="9" data-d=".3" x="559" y="297">Marte</text>
+      </g>
+
+      <!-- Júpiter -->
+      <g class="flota" style="--f:-3.1s">
+        <circle class="trazo cuerpo" data-p="11" data-dur="1.2" pathLength="1" cx="791" cy="237" r="50"/>
+        <path class="trazo fino" data-p="11" data-d=".5" pathLength="1" d="M748,211 H834"/>
+        <path class="trazo fino" data-p="11" data-d=".6" pathLength="1" d="M742,228 H840"/>
+        <path class="trazo fino" data-p="11" data-d=".7" pathLength="1" d="M742,245 H840"/>
+        <path class="trazo fino" data-p="11" data-d=".8" pathLength="1" d="M748,262 H834"/>
+        <ellipse class="trazo cuerpo" data-p="11" data-d="1" pathLength="1" cx="808" cy="252" rx="9" ry="5"/>
+        <text class="rotulo aparece" data-p="11" data-d=".4" x="791" y="317">Júpiter</text>
+      </g>
+
+      <!-- Lugares de los planetas: aparecen al decir "planetas" y se van al dibujarse cada uno -->
+      <circle class="fantasma aparece" data-p="6" data-d=".9" data-hasta="7" cx="247" cy="205" r="11"/>
+      <circle class="fantasma aparece" data-p="6" data-d="1.1" data-hasta="8" cx="391" cy="239" r="19"/>
+      <circle class="fantasma aparece" data-p="6" data-d="1.3" data-hasta="9" cx="559" cy="254" r="15"/>
+      <circle class="fantasma aparece" data-p="6" data-d="1.5" data-hasta="11" cx="791" cy="237" r="50"/>
+
+      <!-- Lucas, el astronauta (palabras "Ya" y "conoce") -->
+      <g id="lucas">
+        <rect class="trazo cuerpo" data-p="0" data-d=".5" pathLength="1" x="138" y="403" width="10" height="21" rx="3"/>
+        <path class="trazo" data-p="0" data-d=".3" pathLength="1" d="M150,435 L151.5,402"/>
+        <circle class="trazo cuerpo" data-p="0" pathLength="1" cx="151.5" cy="385" r="15"/>
+        <path class="trazo fino" data-p="0" data-d=".6" pathLength="1" d="M154.5,376 A9,9 0 0 1 154.5,394"/>
+        <path class="trazo" data-p="0" data-d=".5" pathLength="1" d="M150,435 L153,451 L150,468 L156,468"/>
+        <path class="trazo" data-p="0" data-d=".6" pathLength="1" d="M150,435 L147,451 L144,468 L150,468"/>
+        <path class="trazo" data-p="0" data-d=".7" pathLength="1" d="M151.5,408 L146,420 L144,432"/>
+        <!-- brazo que apunta al cielo -->
+        <path class="trazo" data-p="1" pathLength="1" d="M151.5,408 L166,398 L180,386"/>
+      </g>
+      <!-- puntitos desde su mano hacia los planetas ("nombre") -->
+      <g id="puntero"></g>
+    </svg>
+  </section>
+
+  <section id="texto"><div class="linea" id="linea"></div></section>
+
+  <nav id="controles">
+    <div class="botones">
+      <button id="b-adulta" class="primario">▶ Voz adulta</button>
+      <button id="b-simulada">▶ Lectura simulada</button>
+      <button id="b-grabar">● Grabar mi lectura</button>
+      <button id="b-mia" disabled>▶ Mi lectura</button>
+      <button id="b-reiniciar" aria-label="Reiniciar">⟲</button>
+    </div>
+    <p id="estado">Elige cómo reproducir la escena.</p>
+  </nav>
+
+  <audio id="audio" playsinline></audio>
+
+  <script src="../js/analisis.js"></script>
+  <script>
+  'use strict';
+
+  const { silabas, normalizar, alinear } = window.Analisis;
+  const ORACION = 'Ya conoce el nombre / de varios planetas: / Mercurio, Venus, Marte y Júpiter.';
+  const IDIOMA = 'es-CL';
+  const LATENCIA = 0.4; // segundos que tarda el reconocimiento en entregar una palabra
+
+  const $ = (id) => document.getElementById(id);
+  const NS = 'http://www.w3.org/2000/svg';
+  const $svg = $('svg');
+  const esperar = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  // ================= Texto =================
+  const palabras = [];
+  const cortes = new Set();
+  for (const t of ORACION.replace(/\s*\/\s*/g, ' / ').split(/\s+/)) {
+    if (t === '/') { cortes.add(palabras.length); continue; }
+    const limpia = t.replace(/[^\p{L}]/gu, '');
+    palabras.push({ bruta: t, limpia, norm: normalizar(limpia), sil: Math.max(1, silabas(limpia).length) });
+  }
+  const N = palabras.length;
+  const esperadas = palabras.map((p) => p.norm);
+
+  $('linea').innerHTML = palabras
+    .map((p, i) => (cortes.has(i) ? '<span class="corte">/</span> ' : '') + `<span class="w" data-i="${i}">${p.bruta}</span>`)
+    .join(' ');
+
+  let actual = -1; // palabra que se está diciendo
+  function marcarTexto() {
+    document.querySelectorAll('.w').forEach((el) => {
+      const i = Number(el.dataset.i);
+      el.classList.toggle('leida', i < actual);
+      el.classList.toggle('actual', i === actual);
+    });
+  }
+
+  // ================= Elementos de la escena =================
+  // Estrellas de fondo (posiciones fijas)
+  let semilla = 7;
+  const azar = () => ((semilla = (semilla * 9301 + 49297) % 233280) / 233280);
+  for (let i = 0; i < 46; i++) {
+    const c = document.createElementNS(NS, 'circle');
+    c.setAttribute('cx', (180 + azar() * 800).toFixed(1));
+    c.setAttribute('cy', (20 + azar() * 400).toFixed(1));
+    c.setAttribute('r', (0.6 + azar() * 1.1).toFixed(2));
+    c.setAttribute('class', 'estrella aparece');
+    c.dataset.p = '-1';
+    c.dataset.d = (azar() * 1.5).toFixed(2);
+    c.style.setProperty('--f', `${(-azar() * 3).toFixed(2)}s`);
+    $('estrellas').appendChild(c);
+  }
+  // Puntero: puntitos desde la mano hacia Mercurio (terminan antes de su nombre)
+  for (let k = 1; k <= 7; k++) {
+    const t = k / 7;
+    const c = document.createElementNS(NS, 'circle');
+    c.setAttribute('cx', (186 + (224 - 186) * t).toFixed(1));
+    c.setAttribute('cy', (380 + (268 - 380) * t).toFixed(1));
+    c.setAttribute('r', '1.6');
+    c.setAttribute('class', 'puntero aparece');
+    c.dataset.p = '3';
+    c.dataset.d = (k * 0.08).toFixed(2);
+    $('puntero').appendChild(c);
+  }
+
+  const elementos = [...$svg.querySelectorAll('[data-p]')];
+
+  function reiniciarEscena() {
+    $svg.classList.add('sin-trans');
+    $svg.classList.remove('final');
+    for (const el of elementos) el.classList.remove('on', 'off');
+    void $svg.getBoundingClientRect();
+    $svg.classList.remove('sin-trans');
+    actual = -1;
+    marcarTexto();
+  }
+
+  // Dibuja todo lo asociado a las palabras hasta la i (incluye las que se hayan saltado).
+  function hasta(i) {
+    for (const el of elementos) {
+      if (Number(el.dataset.p) <= i && !el.classList.contains('on')) {
+        el.style.transitionDelay = `${el.dataset.d || 0}s`;
+        if (el.dataset.dur) el.style.transitionDuration = `${el.dataset.dur}s`;
+        el.classList.add('on');
+      }
+      if (el.dataset.hasta !== undefined && Number(el.dataset.hasta) <= i) el.classList.add('off');
+    }
+    if (i > actual) { actual = i; marcarTexto(); }
+  }
+
+  function terminar(g) {
+    if (g !== gen) return;
+    hasta(N - 1);
+    actual = N;
+    marcarTexto();
+    setTimeout(() => { if (g === gen) $svg.classList.add('final'); }, 900);
+  }
+
+  // ================= Reproducción =================
+  let gen = 0; // cada reproducción nueva cancela la anterior
+  const $audio = $('audio');
+
+  function cancelar() {
+    gen++;
+    if ('speechSynthesis' in window) speechSynthesis.cancel();
+    $audio.pause();
+    return gen;
+  }
+
+  function estado(txt) { $('estado').textContent = txt; }
+
+  function voz() {
+    const voces = speechSynthesis.getVoices();
+    return voces.find((v) => v.lang === IDIOMA) || voces.find((v) => v.lang.startsWith('es'));
+  }
+
+  // Tiempos estimados por sílabas (respaldo cuando no hay eventos por palabra)
+  function estimarTiempos(msSilaba) {
+    const t = [];
+    let acum = 0;
+    for (const p of palabras) {
+      t.push(acum);
+      acum += p.sil * msSilaba + (/[,:;.]$/.test(p.bruta) ? 350 : 60);
+    }
+    return t;
+  }
+
+  function seguirLinea(g, tiempos) {
+    tiempos.forEach((ms, i) => setTimeout(() => { if (g === gen) hasta(i); }, ms));
+  }
+
+  // ---------- 1. Voz adulta (la voz del iPad hace de grabación) ----------
+  function vozAdulta() {
+    const g = cancelar();
+    reiniciarEscena();
+    hasta(-1);
+    estado('Voz adulta simulada con la voz del iPad (en la app sería una grabación real).');
+    if (!('speechSynthesis' in window)) {
+      seguirLinea(g, estimarTiempos(200));
+      setTimeout(() => terminar(g), estimarTiempos(200)[N - 1] + 900);
+      return;
+    }
+    const texto = palabras.map((p) => p.bruta).join(' ');
+    const inicios = [];
+    let c = 0;
+    for (const p of palabras) { inicios.push(c); c += p.bruta.length + 1; }
+
+    const u = new SpeechSynthesisUtterance(texto);
+    u.lang = IDIOMA;
+    u.rate = 0.9;
+    const v = voz();
+    if (v) u.voice = v;
+    let hayEventos = false;
+    u.onboundary = (e) => {
+      if (g !== gen || (e.name && e.name !== 'word')) return;
+      hayEventos = true;
+      let i = 0;
+      while (i + 1 < N && inicios[i + 1] <= e.charIndex) i++;
+      hasta(i);
+    };
+    u.onstart = () => {
+      const t0 = performance.now();
+      // si la voz no informa cada palabra, se sigue una línea de tiempo estimada
+      setTimeout(() => {
+        if (g !== gen || hayEventos) return;
+        const desfase = performance.now() - t0;
+        seguirLinea(g, estimarTiempos(185).map((t) => Math.max(0, t - desfase)));
+      }, 700);
+    };
+    u.onend = () => terminar(g);
+    setTimeout(() => { if (g === gen) speechSynthesis.speak(u); }, 700);
+  }
+
+  // ---------- 2. Lectura simulada de una niña ----------
+  function decirPalabra(txt, g) {
+    return new Promise((listo) => {
+      if (!('speechSynthesis' in window)) return setTimeout(listo, 260 * Math.max(1, silabas(txt).length));
+      const u = new SpeechSynthesisUtterance(txt);
+      u.lang = IDIOMA;
+      u.rate = 0.85;
+      u.pitch = 1.45;
+      const v = voz();
+      if (v) u.voice = v;
+      u.onend = u.onerror = () => listo();
+      if (g === gen) speechSynthesis.speak(u); else listo();
+    });
+  }
+
+  async function lecturaSimulada() {
+    const g = cancelar();
+    reiniciarEscena();
+    hasta(-1);
+    estado('Lectura simulada: más lenta, con pausas y dudas en las palabras largas.');
+    await esperar(800);
+    for (let i = 0; i < N; i++) {
+      if (g !== gen) return;
+      const p = palabras[i];
+      if (p.sil >= 3) await esperar(450 + Math.random() * 400); // duda antes de palabras largas
+      if (g !== gen) return;
+      hasta(i);
+      if (p.norm === 'jupiter') {
+        // tropieza y se corrige: "Jú… Júpiter"
+        await decirPalabra(silabas(p.limpia)[0], g);
+        await esperar(450);
+      }
+      await decirPalabra(p.limpia, g);
+      await esperar(/[,:;.]$/.test(p.bruta) ? 450 : 80 + Math.random() * 220);
+    }
+    terminar(g);
+  }
+
+  // ---------- 3. Grabar mi lectura (experimental) ----------
+  const Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const grab = { activa: false, tiempos: null, url: null, duracion: 0, t0: 0, pos: 0, desde: 0 };
+  let recorder = null;
+  let flujo = null;
+  let reconocedor = null;
+
+  async function alternarGrabacion() {
+    if (grab.activa) return detenerGrabacion();
+    const g = cancelar();
+    reiniciarEscena();
+    hasta(-1);
+    try {
+      flujo = await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch {
+      estado('No se pudo usar el micrófono.');
+      return;
+    }
+    if (g !== gen) return;
+    const partes = [];
+    recorder = new MediaRecorder(flujo);
+    recorder.ondataavailable = (e) => { if (e.data.size) partes.push(e.data); };
+    recorder.onstop = () => {
+      if (grab.url) URL.revokeObjectURL(grab.url);
+      grab.url = URL.createObjectURL(new Blob(partes, { type: recorder.mimeType || 'audio/mp4' }));
+      flujo.getTracks().forEach((t) => t.stop());
+      $('b-mia').disabled = false;
+      const conTiempo = grab.tiempos.filter((t) => t !== null).length;
+      estado(conTiempo
+        ? `Grabación lista. El reconocimiento marcó ${conTiempo} de ${N} palabras. Toca «▶ Mi lectura».`
+        : 'Grabación lista, pero el reconocimiento no funcionó junto con la grabación: se usarán tiempos estimados.');
+    };
+
+    grab.tiempos = Array(N).fill(null);
+    grab.pos = 0;
+    grab.desde = 0;
+    grab.t0 = performance.now();
+    grab.activa = true;
+    recorder.start();
+    $('b-grabar').textContent = '■ Detener';
+    $('b-grabar').classList.add('grabando');
+    estado('Grabando… lee la oración en voz alta.');
+    if (Rec) iniciarReconocimiento();
+  }
+
+  function iniciarReconocimiento() {
+    reconocedor = new Rec();
+    reconocedor.lang = IDIOMA;
+    reconocedor.continuous = true;
+    reconocedor.interimResults = true;
+    reconocedor.onresult = (e) => {
+      if (!grab.activa) return;
+      let t = '';
+      for (let i = 0; i < e.results.length; i++) t += ' ' + e.results[i][0].transcript;
+      const dichas = t.split(/\s+/).map(normalizar).filter(Boolean);
+      const r = alinear(esperadas, dichas, grab.desde, esperadas.map(() => 'pendiente'));
+      if (r.pos <= grab.pos) return;
+      const ahora = Math.max(0, (performance.now() - grab.t0) / 1000 - LATENCIA);
+      for (let k = grab.pos; k < r.pos; k++) if (grab.tiempos[k] === null) grab.tiempos[k] = ahora;
+      grab.pos = r.pos;
+      actual = r.pos;
+      marcarTexto();
+      if (grab.pos >= N) setTimeout(() => { if (grab.activa) detenerGrabacion(); }, 900);
+    };
+    reconocedor.onend = () => {
+      if (!grab.activa) return;
+      try { reconocedor.start(); grab.desde = grab.pos; } catch { /* sigue grabando sin reconocimiento */ }
+    };
+    try { reconocedor.start(); } catch { /* sin reconocimiento */ }
+  }
+
+  function detenerGrabacion() {
+    grab.activa = false;
+    grab.duracion = (performance.now() - grab.t0) / 1000;
+    try { reconocedor?.abort(); } catch { /* nada */ }
+    if (recorder && recorder.state !== 'inactive') recorder.stop();
+    $('b-grabar').textContent = '● Grabar mi lectura';
+    $('b-grabar').classList.remove('grabando');
+    actual = -1;
+    marcarTexto();
+  }
+
+  // Completa los tiempos que faltan repartiendo por sílabas entre los conocidos.
+  function completarTiempos(tiempos, duracion) {
+    const t = tiempos.slice();
+    const pesos = palabras.map((p) => p.sil);
+    const conocidos = [[-1, 0.3]];
+    t.forEach((v, i) => { if (v !== null) conocidos.push([i, v]); });
+    conocidos.push([N, Math.max(0.6, duracion - 0.3)]);
+    for (let k = 0; k < conocidos.length - 1; k++) {
+      const [a, ta] = conocidos[k];
+      const [b, tb] = conocidos[k + 1];
+      const tramo = pesos.slice(a + 1, b).reduce((s, x) => s + x, 0) + 1;
+      let acum = 0;
+      for (let i = a + 1; i < b; i++) {
+        acum += i === a + 1 ? 0.5 : pesos[i - 1];
+        t[i] = ta + ((tb - ta) * acum) / tramo;
+      }
+    }
+    return t;
+  }
+
+  function miLectura() {
+    if (!grab.url) return;
+    const g = cancelar();
+    reiniciarEscena();
+    hasta(-1);
+    const duracion = Number.isFinite($audio.duration) && $audio.duration > 0 ? $audio.duration : grab.duracion;
+    const tiempos = completarTiempos(grab.tiempos, duracion);
+    $audio.src = grab.url;
+    $audio.currentTime = 0;
+    $audio.play().catch(() => estado('No se pudo reproducir la grabación.'));
+    estado('Reproduciendo tu lectura.');
+    const tic = () => {
+      if (g !== gen) return;
+      const t = $audio.currentTime;
+      let i = actual;
+      while (i + 1 < N && tiempos[i + 1] <= t) i++;
+      if (i > actual) hasta(i);
+      if ($audio.ended) return terminar(g);
+      requestAnimationFrame(tic);
+    };
+    requestAnimationFrame(tic);
+  }
+
+  // ================= Controles =================
+  $('b-adulta').addEventListener('click', vozAdulta);
+  $('b-simulada').addEventListener('click', lecturaSimulada);
+  $('b-grabar').addEventListener('click', alternarGrabacion);
+  $('b-mia').addEventListener('click', miLectura);
+  $('b-reiniciar').addEventListener('click', () => {
+    cancelar();
+    if (grab.activa) detenerGrabacion();
+    reiniciarEscena();
+    hasta(-1);
+    estado('Elige cómo reproducir la escena.');
+  });
+  if ('speechSynthesis' in window) speechSynthesis.getVoices(); // precarga las voces
+
+  hasta(-1);
+  </script>
+</body>
+</html>

@@ -24,6 +24,11 @@ js/app.js          pantallas, etapas y reconocimiento de voz (configuración al 
 assets/            imágenes, sonidos y animaciones livianas (futuro)
 ```
 
+## Maquetas
+
+- `maquetas/escalera.html`: prueba de la animación para la etapa Frases (escalera que se materializa con cada repetición y un personaje que la recorre). Modos: Auto (simula la lectura), Manual (una palabra por toque) y Micrófono.
+- `maquetas/cuento-planetas.html`: escena 3 de «El astronauta curioso» animada en líneas, sincronizada palabra por palabra con una voz adulta (simulada con la voz del iPad), una lectura infantil simulada o una grabación real de la niña (experimental).
+
 ## Probar en el PC
 
 ```
