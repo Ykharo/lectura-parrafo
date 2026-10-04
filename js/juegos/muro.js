@@ -2,7 +2,7 @@
 // choque del astronauta (grietas → más grietas → se rompe a la tercera) y la palabra rearmada
 // baja hacia su oración. (Viene de maquetas/muro.html.) Necesita js/juegos/escalera.js.
 //
-//   const m = Muro.crear(svg, { alListo(golpes), alRomper(), alTerminar() })
+//   const m = Muro.crear(svg, { alListo(golpes), alCorrer(), alRomper(), alTerminar() })
 //   m.palabra(silabas)   arma el muro de una palabra
 //   m.leer()             registra una lectura (si el astronauta aún no está listo, queda pendiente)
 //   m.destruir()
@@ -66,7 +66,7 @@
     };
   }
 
-  function crear(svg, { alListo = () => {}, alRomper = () => {}, alTerminar = () => {} } = {}) {
+  function crear(svg, { alListo = () => {}, alCorrer = () => {}, alRomper = () => {}, alTerminar = () => {} } = {}) {
     const pre = `muro${++contador}-`;
     svg.innerHTML = `
       <defs><pattern id="${pre}ach" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(45)">
@@ -240,10 +240,12 @@
     }
 
     // ---------- Astronauta ----------
+    // Astronauta agachado esperando la lectura: las sílabas laten
     function listo() {
       pj.modo = 'agachado';
       pj.dir = -1;
       pj.x = X_INICIO;
+      svg.classList.add('esperando');
       alListo(golpes);
       if (pendiente) {
         pendiente = false;
@@ -255,6 +257,8 @@
     function correr() {
       pj.modo = 'corriendo';
       pj.t = 0;
+      svg.classList.remove('esperando');
+      alCorrer();
     }
 
     function impacto() {

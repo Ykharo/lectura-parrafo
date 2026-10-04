@@ -80,34 +80,41 @@ function reproducirTramo(i0, i1) {
 }
 
 // ================= Practicar: muro de palabras =================
-function etapaMuro() {
-  const lista = listaMuro();
-  if (!lista.length) return etapaFrases();
+// lista: palabras a practicar (por defecto, todas las escenas); alFin: qué sigue al terminar
+function etapaMuro(lista = listaMuro(), alFin = null) {
+  const seguir = alFin || etapaFrases;
+  if (!lista.length) return seguir();
   ocultarAviso();
   marcarPaso(2);
-  practica = { lista, indice: 0, consumidas: 0, ignorar: false, saltadas: new Set() };
+  practica = { lista, indice: 0, consumidas: 0, ignorar: false, saltadas: new Set(), alFin: seguir };
   pantalla('juego juego-muro', `
     <p class="progreso" id="j-progreso"></p>
     <svg viewBox="0 0 1000 260" aria-hidden="true"></svg>
     <p class="parrafo oracion-juego" id="j-oracion"></p>
     <div class="mensaje" id="j-mensaje"></div>
-  `, [
-    { texto: '🔊 Escuchar', accion: escucharPalabraMuro },
-    { texto: '✓ La leí', accion: () => muroJuego && muroJuego.leer() },
-  ]);
+  `, [{ texto: '🔊 Escuchar', accion: escucharPalabraMuro }]);
+  const latir = (si) => {
+    const el = $vista.querySelector('.objetivo');
+    if (el) el.classList.toggle('latiendo', si);
+  };
   muroJuego = Muro.crear($vista.querySelector('svg'), {
+    // la palabra late mientras espera la lectura
     alListo: (golpes) => {
+      latir(true);
       const el = document.getElementById('j-mensaje');
       if (el) el.textContent = golpes === 0 ? 'Lee la palabra en voz alta' : '¡Otra vez!';
     },
+    alCorrer: () => latir(false),
     alRomper: () => {
       const el = $vista.querySelector('.objetivo');
-      if (el) { el.classList.remove('objetivo'); el.classList.add('lograda'); }
+      if (el) { el.classList.remove('objetivo', 'latiendo'); el.classList.add('lograda'); }
       const m = document.getElementById('j-mensaje');
       if (m) m.textContent = '¡Muro roto!';
     },
     alTerminar: siguienteMuro,
   });
+  // respaldo discreto si el micrófono no capta la palabra: un adulto puede tocar la escena
+  $vista.querySelector('svg').addEventListener('click', () => { if (muroJuego) muroJuego.leer(); });
   escucha.alReiniciar = () => { practica.consumidas = 0; };
   escucha.alOir = oirMuro;
   escucha.iniciar();
@@ -152,16 +159,17 @@ function siguienteMuro() {
   if (muroJuego) { muroJuego.destruir(); muroJuego = null; }
   pantalla('centro', `
     <p class="grande">¡Palabras listas!</p>
-    <p class="sub">Ahora vamos a leer por frases.</p>
+    <p class="sub">Ahora vamos a leer por bloques.</p>
   `);
-  setTimeout(etapaFrases, 1800); // el micrófono sigue encendido
+  setTimeout(practica.alFin, 1800); // el micrófono sigue encendido
 }
 
 // ================= Frases: escalera =================
-function etapaEscalera() {
+// desde/hasta: oraciones a recorrer (por defecto, todas); alFin: qué sigue al terminar
+function etapaEscalera({ desde = 0, hasta = oracionesTexto.length, alFin = antesDeLeer } = {}) {
   ocultarAviso();
   marcarPaso(3);
-  frases = { oracion: 0, nivel: 1, consumidas: 0, pausada: false, acerto: false };
+  frases = { oracion: desde, hasta, alFin, nivel: 1, consumidas: 0, pausada: false, acerto: false };
   escucha.alReiniciar = () => {
     frases.base = frases.estados;
     frases.desde = frases.pos;
@@ -175,7 +183,7 @@ function etapaEscalera() {
 function montarOracionEscalera() {
   const o = oracionesTexto[frases.oracion];
   pantalla('juego juego-escalera lectura frases', `
-    <p class="progreso">Oración ${frases.oracion + 1} de ${oracionesTexto.length}</p>
+    <p class="progreso">Escena ${frases.oracion + 1} de ${oracionesTexto.length} · Por bloques</p>
     <svg viewBox="0 0 1000 520" preserveAspectRatio="xMidYMid meet" aria-hidden="true"></svg>
     <p class="parrafo" id="j-frase"></p>
     <div class="mensaje"></div>
@@ -249,10 +257,10 @@ function siguienteNivel() {
     return mostrarNivel();
   }
   frases.oracion++;
-  if (frases.oracion < oracionesTexto.length) return montarOracionEscalera();
+  if (frases.oracion < frases.hasta) return montarOracionEscalera();
   escaleraJuego.destruir();
   escaleraJuego = null;
-  antesDeLeer();
+  frases.alFin();
 }
 
 async function escucharFraseEscalera() {
@@ -262,18 +270,62 @@ async function escucharFraseEscalera() {
   setTimeout(() => { frases.consumidas = escucha.cantidad; frases.pausada = false; }, 600);
 }
 
-// ================= Leer: escenas animadas =================
-function etapaCuento() {
-  ocultarAviso();
-  marcarPaso(4);
-  const def = cuentoDe(texto);
-  cuento = { def, escena: 0, estados: palabras.map(() => 'pendiente'), ms: 0, reproduccion: 0 };
-  // En iOS el audio debe sonar por primera vez dentro de un toque: se "desbloquea" en silencio.
-  prepararAudioCuento(def);
+// En iOS el audio debe sonar por primera vez dentro de un toque: se "desbloquea" en silencio.
+function desbloquearAudio() {
+  prepararAudioCuento(cuentoDe(texto));
   audioCuento.muted = true;
   audioCuento.play()
     .then(() => { audioCuento.pause(); audioCuento.muted = false; })
     .catch(() => { audioCuento.muted = false; });
+}
+
+function nuevoCuento(guiado) {
+  cuento = {
+    def: cuentoDe(texto), escena: 0, estados: palabras.map(() => 'pendiente'), ms: 0, reproduccion: 0, guiado,
+  };
+}
+
+// ================= Recorrido guiado: escena por escena =================
+// Por cada escena: presentación → palabras difíciles (muro) → bloques (escalera) → lectura con animación.
+function empezarGuiado() {
+  nuevoCuento(true);
+  desbloquearAudio();
+  presentarEscena();
+}
+
+function presentarEscena() {
+  escucha.detener();
+  detenerCuento();
+  ocultarAviso();
+  marcarPaso(1);
+  const k = cuento.escena;
+  const o = oracionesTexto[k];
+  const difs = listaMuro().filter((p) => p.escena === k);
+  const marcadas = new Set(difs.map((p) => p.i));
+  const ps = palabras.slice(o.inicio, o.fin)
+    .map((p) => `<span class="p${marcadas.has(p.i) ? ' dificil' : ''}">${escapar(p.bruta)}</span>`).join(' ');
+  pantalla('paso1 presentacion', `
+    <p class="titulo">Escena ${k + 1} de ${oracionesTexto.length}</p>
+    <p class="indicacion">${difs.length
+      ? `Primero practica ${difs.length === 1 ? 'la palabra' : `las ${difs.length} palabras`} en <b>dorado</b>, luego por bloques, y al final lee la oración.`
+      : 'Primero por bloques, y al final lee la oración.'}</p>
+    <p class="parrafo">${ps}</p>
+  `, [{ texto: 'Comenzar', primario: true, accion: () => practicarEscena(difs) }]);
+}
+
+function practicarEscena(difs) {
+  const k = cuento.escena;
+  etapaMuro(difs, () => etapaEscalera({ desde: k, hasta: k + 1, alFin: () => leerEscena() }));
+}
+
+// ================= Leer: escenas animadas =================
+// Lectura directa de todas las escenas (para quien ya leyó el cuento)
+function etapaCuento() {
+  escucha.detener();
+  ocultarAviso();
+  marcarPaso(4);
+  nuevoCuento(false);
+  desbloquearAudio();
   leerEscena();
 }
 
@@ -296,6 +348,8 @@ function montarEscena(k, rotulo, mensaje, botones) {
 
 function leerEscena() {
   const k = cuento.escena;
+  ocultarAviso();
+  marcarPaso(4);
   montarEscena(k, `Escena ${k + 1} de ${oracionesTexto.length}`,
     Reconocedor ? 'Lee la oración en voz alta' : 'Lee la oración y toca «Terminé»',
     [{ texto: 'Terminé', accion: terminarEscena }]);
@@ -421,18 +475,17 @@ function siguienteEscena() {
   cuento.reproduccion++;
   audioCuento.pause();
   cuento.escena++;
-  if (cuento.escena < oracionesTexto.length) return leerEscena();
+  if (cuento.escena < oracionesTexto.length) return cuento.guiado ? presentarEscena() : leerEscena();
   resultados({ estados: cuento.estados, segundos: Math.round(cuento.ms / 1000) });
 }
 
 // ================= Al final: el cuento completo con la voz adulta =================
 function verCuentoCompleto() {
   escucha.detener();
-  const def = cuentoDe(texto);
-  if (!cuento || cuento.def !== def) {
-    cuento = { def, escena: 0, estados: palabras.map(() => 'pendiente'), ms: 0, reproduccion: 0 };
-  }
-  prepararAudioCuento(def);
+  detenerCuento();
+  if (!cuento || cuento.def !== cuentoDe(texto)) nuevoCuento(false);
+  prepararAudioCuento(cuento.def);
+  marcarPaso(4);
   cuento.completo = true;
   cuento.leyendo = false;
   escenaCompleta(0);
@@ -459,7 +512,7 @@ function finCuentoCompleto() {
   cuento.completo = false;
   audioCuento.pause();
   ponerBotones([
-    { texto: 'Otro texto', accion: inicio },
+    { texto: '← Volver al texto', accion: etapa1 },
     { texto: '↺ Ver el cuento otra vez', primario: true, accion: verCuentoCompleto },
   ]);
 }

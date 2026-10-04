@@ -388,13 +388,20 @@ function etapa1() {
   ocultarAviso();
   marcarPaso(1);
   practica = null;
+  const animado = !!cuentoDe(texto);
+  // En los cuentos animados, quien ya lo leyó puede ir directo a la lectura o al cuento completo
+  const yaLeido = animado && Almacen.historial().some((r) => r.textoId === texto.id);
   pantalla('paso1', `
     <p class="titulo">${escapar(texto.titulo)}</p>
     <p class="indicacion">Mira el texto. Las palabras en <b>dorado</b> son las más difíciles.</p>
     ${htmlParrafo()}
   `, [
     { texto: '← Textos', accion: inicio },
-    { texto: '', primario: true, accion: etapa2 },
+    ...(yaLeido ? [
+      { texto: '▶ Escuchar el cuento', accion: verCuentoCompleto },
+      { texto: 'Leer con animación', accion: etapaCuento },
+    ] : []),
+    { texto: '', primario: true, accion: animado ? empezarGuiado : etapa2 },
   ]);
 
   const boton = $acciones.querySelector('.primario');
@@ -402,7 +409,11 @@ function etapa1() {
     $vista.querySelectorAll('.p').forEach((el) => {
       el.classList.toggle('dificil', dificiles.has(palabras[el.dataset.i].norm));
     });
-    const n = (juegosDe(texto).muro ? listaMuro() : listaPractica()).length;
+    if (animado) {
+      boton.textContent = 'Empezar lectura';
+      return;
+    }
+    const n = listaPractica().length;
     boton.textContent = n ? `Practicar ${n} palabras` : 'Leer por frases';
   };
   // Tocar una palabra la agrega o la quita de las difíciles (queda guardado para este texto).

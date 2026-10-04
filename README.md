@@ -10,11 +10,12 @@ Aplicación web para practicar lectura en voz alta (español de Chile, nivel ~9 
 3. **Frases**: cada oración se arma de a un bloque con sentido (`[A]`, `[A / B]`, `[A / B / C]`…) y se lee en voz alta en cada paso, hasta leerla completa. Los bloques se calculan solos (puntuación y palabras como *y, que, con, entre…*) o se marcan a mano escribiendo ` / ` en el texto.
 4. **Leer**: el párrafo completo; cada palabra se pinta verde al leerla (naranja si se saltó). Al final: tiempo, palabras por minuto y palabras para repasar.
 
-**Cuentos animados** (por ahora, «El astronauta curioso»), activados con `cuento: '<id>'` en `js/textos.js`:
-- **Practicar → muro de palabras**: hasta 5 palabras difíciles por escena (las marcadas en Mirar), agrupadas escena por escena; cada una es un muro de ladrillos-sílaba que el astronauta rompe en 3 lecturas. «🔊 Escuchar» usa la voz adulta grabada.
-- **Frases → escalera**: cada repetición de la oración materializa un nivel; el astronauta lo recorre al ritmo de la lectura y celebra al final.
-- **Leer → escenas**: una oración a la vez; al terminarla, la escena se dibuja al ritmo de la voz adulta.
-- **Resultados → «▶ Ver el cuento completo»**: las 5 escenas seguidas con la voz adulta.
+**Cuentos animados** (por ahora, «El astronauta curioso»), activados con `cuento: '<id>'` en `js/textos.js`. Se recorren **escena por escena** (una escena = una oración):
+1. **Mirar**: el texto completo con las palabras difíciles (hasta 5 por escena) y «Empezar lectura». Si ya se leyó antes, también «Leer con animación» (directo a las escenas) y «▶ Escuchar el cuento».
+2. Para cada escena: **presentación** (la oración con sus palabras en dorado) → **muro de palabras** (cada palabra es un muro de ladrillos-sílaba que el astronauta rompe en 3 lecturas; la palabra late mientras espera la lectura) → **bloques** (escalera: cada repetición materializa un nivel) → **lectura con animación** (al terminar la oración, la escena se dibuja al ritmo de la voz adulta grabada) → escena siguiente.
+3. **Resultados** → «▶ Ver el cuento completo»: las 5 escenas seguidas con la voz adulta.
+
+Si el micrófono no capta una palabra en el muro, un adulto puede tocar la escena para contarla como leída.
 
 Archivos: `js/cuentos/<id>.js` (escenas), `js/cuento.js` (motor de animación), `js/juegos/muro.js` y `js/juegos/escalera.js`, `js/cuento-app.js` (las etapas especiales).
 
