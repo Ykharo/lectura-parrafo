@@ -46,7 +46,8 @@ function cargarTexto(t) {
   palabras = analizarParrafo(t.parrafo);
   esperadas = palabras.map((p) => p.norm);
   oracionesTexto = oraciones(palabras);
-  dificiles = new Set(Almacen.dificiles(t.id) || dificilesAutomaticas(palabras));
+  const automaticas = juegosDe(t).muro ? dificilesPorEscena(palabras, oracionesTexto) : dificilesAutomaticas(palabras);
+  dificiles = new Set(Almacen.dificiles(t.id) || automaticas);
 
   // Cuento animado: tiempos de cada palabra en la grabación adulta
   tiemposCuento = null;
@@ -401,7 +402,7 @@ function etapa1() {
     $vista.querySelectorAll('.p').forEach((el) => {
       el.classList.toggle('dificil', dificiles.has(palabras[el.dataset.i].norm));
     });
-    const n = listaPractica().length;
+    const n = (juegosDe(texto).muro ? listaMuro() : listaPractica()).length;
     boton.textContent = n ? `Practicar ${n} palabras` : 'Leer por frases';
   };
   // Tocar una palabra la agrega o la quita de las difíciles (queda guardado para este texto).
@@ -609,11 +610,7 @@ function antesDeLeer() {
     <p class="sub">${animado
       ? 'Ahora lee el cuento, una escena a la vez. Al terminar cada oración, se dibuja la escena.'
       : 'Ahora lee el párrafo completo en voz alta.'}</p>
-    ${animado ? `<label class="opcion"><input type="checkbox" id="grabar-voz"${grabarVozActivo() ? ' checked' : ''}>
-      Grabar mi voz para escucharla en cada escena</label>` : ''}
   `, [{ texto: 'Comenzar lectura', primario: true, accion: comenzarLectura }]);
-  const casilla = document.getElementById('grabar-voz');
-  if (casilla) casilla.addEventListener('change', () => cambiarGrabarVoz(casilla.checked));
 }
 
 // Los textos con cuento animado se leen por escenas; los demás, de corrido.

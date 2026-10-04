@@ -1,19 +1,47 @@
 'use strict';
 
 // Etapas especiales de los textos con cuento animado (js/cuentos/<id>.js):
-//   Practicar → muro de palabras · Frases → escalera · Leer → escenas animadas, con la voz
-//   adulta grabada y con la propia voz de la lectora · Al final → el cuento completo.
+//   Practicar → muro de palabras (hasta 5 por escena) · Frases → escalera ·
+//   Leer → escenas animadas con la voz adulta grabada · Al final → el cuento completo.
 // Usa el estado y las utilidades de js/app.js (se carga antes que app.js; todo se llama en tiempo de ejecución).
 
 const audioCuento = new Audio(); // voz adulta grabada (texto completo)
 audioCuento.preload = 'auto';
-const audioVoz = new Audio();    // grabaciones de la lectora
 let cuento = null;
 let muroJuego = null;
 let escaleraJuego = null;
-const PALABRAS_MURO = 5;
+const MAX_POR_ESCENA = 5;        // palabras difíciles a practicar por escena
+const UMBRAL_ESCENA = 1.5;       // puntaje mínimo de dificultad dentro de una escena
 
 const juegosDe = (t) => (cuentoDe(t) && cuentoDe(t).juegos) || {};
+
+// Selección automática para cuentos: hasta 5 palabras difíciles por escena (oración)
+function dificilesPorEscena(ps, ors) {
+  const elegidas = [];
+  for (const o of ors) {
+    ps.slice(o.inicio, o.fin)
+      .filter((p) => p.puntos >= UMBRAL_ESCENA)
+      .sort((a, b) => b.puntos - a.puntos)
+      .slice(0, MAX_POR_ESCENA)
+      .forEach((p) => elegidas.push(p.norm));
+  }
+  return elegidas;
+}
+
+// Palabras del muro: las marcadas en Mirar, agrupadas por escena (máx. 5 cada una, sin repetir)
+function listaMuro() {
+  const vistas = new Set();
+  const lista = [];
+  oracionesTexto.forEach((o, escena) => {
+    palabras.slice(o.inicio, o.fin)
+      .filter((p) => dificiles.has(p.norm) && !vistas.has(p.norm) && vistas.add(p.norm))
+      .sort((a, b) => b.puntos - a.puntos)
+      .slice(0, MAX_POR_ESCENA)
+      .sort((a, b) => a.i - b.i)
+      .forEach((p) => lista.push({ ...p, escena }));
+  });
+  return lista;
+}
 
 // Prepara la grabación adulta del texto (se llama al elegir el texto)
 function prepararAudioCuento(def) {
@@ -24,7 +52,6 @@ function prepararAudioCuento(def) {
 function detenerCuento() {
   if (cuento) cuento.reproduccion++;
   audioCuento.pause();
-  audioVoz.pause();
   if (muroJuego) { muroJuego.destruir(); muroJuego = null; }
   if (escaleraJuego) { escaleraJuego.destruir(); escaleraJuego = null; }
 }
@@ -54,8 +81,7 @@ function reproducirTramo(i0, i1) {
 
 // ================= Practicar: muro de palabras =================
 function etapaMuro() {
-  // las palabras más difíciles, en el orden en que aparecen
-  const lista = listaPractica().slice().sort((a, b) => b.puntos - a.puntos).slice(0, PALABRAS_MURO).sort((a, b) => a.i - b.i);
+  const lista = listaMuro();
   if (!lista.length) return etapaFrases();
   ocultarAviso();
   marcarPaso(2);
@@ -90,8 +116,10 @@ function etapaMuro() {
 
 function mostrarMuro() {
   const p = practica.lista[practica.indice];
-  const o = oracionesTexto.find((x) => p.i >= x.inicio && p.i < x.fin);
-  document.getElementById('j-progreso').textContent = `Palabra ${practica.indice + 1} de ${practica.lista.length}`;
+  const o = oracionesTexto[p.escena];
+  const deLaEscena = practica.lista.filter((x) => x.escena === p.escena);
+  document.getElementById('j-progreso').textContent =
+    `Escena ${p.escena + 1} de ${oracionesTexto.length} · Palabra ${deLaEscena.indexOf(p) + 1} de ${deLaEscena.length}`;
   document.getElementById('j-oracion').innerHTML = palabras.slice(o.inicio, o.fin)
     .map((w) => (w.i === p.i ? `<span class="objetivo">${escapar(w.bruta)}</span>` : escapar(w.bruta)))
     .join(' ');
@@ -234,70 +262,18 @@ async function escucharFraseEscalera() {
   setTimeout(() => { frases.consumidas = escucha.cantidad; frases.pausada = false; }, 600);
 }
 
-// ================= Grabación de la voz de la lectora =================
-const PREF_GRABAR = 'lectura-parrafo:grabar-voz';
-function grabarVozActivo() {
-  try { return localStorage.getItem(PREF_GRABAR) !== 'no'; } catch { return true; }
-}
-function cambiarGrabarVoz(si) {
-  try { localStorage.setItem(PREF_GRABAR, si ? 'si' : 'no'); } catch { /* sin almacenamiento */ }
-}
-
-const grabadora = {
-  flujo: null,
-  rec: null,
-  partes: [],
-  t0: 0,
-  activa: false,
-
-  async iniciar() {
-    if (!grabarVozActivo() || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || typeof MediaRecorder === 'undefined') return false;
-    try {
-      this.flujo = await navigator.mediaDevices.getUserMedia({ audio: true });
-    } catch {
-      return false;
-    }
-    this.partes = [];
-    this.rec = new MediaRecorder(this.flujo);
-    this.rec.ondataavailable = (e) => { if (e.data.size) this.partes.push(e.data); };
-    this.rec.start();
-    this.t0 = performance.now();
-    this.activa = true;
-    return true;
-  },
-
-  segundos() { return (performance.now() - this.t0) / 1000; },
-
-  // Detiene la grabación y apaga el micrófono; entrega { url, duracion } o null
-  detener() {
-    return new Promise((listo) => {
-      if (!this.activa) return listo(null);
-      this.activa = false;
-      const duracion = this.segundos();
-      const rec = this.rec;
-      rec.onstop = () => {
-        this.flujo.getTracks().forEach((t) => t.stop());
-        const blob = new Blob(this.partes, { type: rec.mimeType || 'audio/mp4' });
-        listo(blob.size ? { url: URL.createObjectURL(blob), duracion } : null);
-      };
-      rec.stop();
-    });
-  },
-};
-
 // ================= Leer: escenas animadas =================
 function etapaCuento() {
   ocultarAviso();
   marcarPaso(4);
   const def = cuentoDe(texto);
-  if (cuento && cuento.voces) cuento.voces.forEach((v) => v && URL.revokeObjectURL(v.url));
-  cuento = { def, escena: 0, estados: palabras.map(() => 'pendiente'), ms: 0, reproduccion: 0, voces: [] };
+  cuento = { def, escena: 0, estados: palabras.map(() => 'pendiente'), ms: 0, reproduccion: 0 };
   // En iOS el audio debe sonar por primera vez dentro de un toque: se "desbloquea" en silencio.
   prepararAudioCuento(def);
-  for (const a of [audioCuento, audioVoz]) {
-    a.muted = true;
-    a.play().then(() => { a.pause(); a.muted = false; }).catch(() => { a.muted = false; });
-  }
+  audioCuento.muted = true;
+  audioCuento.play()
+    .then(() => { audioCuento.pause(); audioCuento.muted = false; })
+    .catch(() => { audioCuento.muted = false; });
   leerEscena();
 }
 
@@ -324,10 +300,7 @@ function leerEscena() {
     Reconocedor ? 'Lee la oración en voz alta' : 'Lee la oración y toca «Terminé»',
     [{ texto: 'Terminé', accion: terminarEscena }]);
   const o = cuento.o;
-  Object.assign(cuento, {
-    base: cuento.estados.slice(), desde: o.inicio, pos: o.inicio, consumidas: 0, t0: null, leyendo: true,
-    voz: { tiempos: new Array(o.fin - o.inicio).fill(null) },
-  });
+  Object.assign(cuento, { base: cuento.estados.slice(), desde: o.inicio, pos: o.inicio, consumidas: 0, t0: null, leyendo: true });
   escucha.alReiniciar = () => {
     cuento.base = cuento.estados.slice();
     cuento.desde = cuento.pos;
@@ -336,28 +309,13 @@ function leerEscena() {
   escucha.alOir = oirEscena;
   escucha.iniciar();
   pintarEscena();
-  // Se graba su voz para que pueda escucharse después (si el iPad lo permite)
-  const voz = cuento.voz;
-  grabadora.iniciar().then((ok) => {
-    if (!ok) { voz.tiempos = null; return; }
-    if (cuento.voz !== voz || !cuento.leyendo) grabadora.detener(); // la escena terminó antes
-  });
 }
 
 function oirEscena(t) {
   if (!cuento.leyendo) return;
   if (cuento.consumidas > t.length) cuento.consumidas = t.length;
-  const antes = cuento.pos;
   const r = alinear(esperadas.slice(0, cuento.o.fin), t.slice(cuento.consumidas), cuento.desde, cuento.base);
   if (r.pos > cuento.o.inicio && !cuento.t0) cuento.t0 = performance.now();
-  // cuándo dijo cada palabra (para sincronizar la escena con su propia voz)
-  if (grabadora.activa && cuento.voz.tiempos && r.pos > antes) {
-    const s = Math.max(0, grabadora.segundos() - 0.4);
-    for (let i = antes; i < r.pos; i++) {
-      const rel = i - cuento.o.inicio;
-      if (cuento.voz.tiempos[rel] === null) cuento.voz.tiempos[rel] = s;
-    }
-  }
   cuento.pos = r.pos;
   cuento.estados = r.estados;
   pintarEscena();
@@ -380,38 +338,11 @@ function terminarEscena() {
   ponerBotones([]);
   $vista.querySelector('.mensaje').textContent = '';
   const k = cuento.escena;
-  const voz = cuento.voz;
-  grabadora.detener().then((r) => {
-    if (r && voz.tiempos) cuento.voces[k] = { url: r.url, duracion: r.duracion, tiempos: voz.tiempos };
-  });
-  setTimeout(() => { if (cuento && cuento.escena === k && !cuento.leyendo) reproducirEscena('adulta'); }, 700);
+  setTimeout(() => { if (cuento && cuento.escena === k && !cuento.leyendo) reproducirEscena(); }, 700);
 }
 
-// Completa los tiempos que faltan repartiendo por sílabas entre los conocidos
-function completarTiempos(tiempos, duracion, ps) {
-  const n = ps.length;
-  const t = tiempos.slice();
-  const peso = ps.map((p) => p.silabas.length + 0.3);
-  const conocidos = [[-1, 0.2]];
-  t.forEach((v, i) => { if (v !== null) conocidos.push([i, v]); });
-  conocidos.push([n, Math.max(0.6, duracion - 0.2)]);
-  // entre dos palabras con tiempo conocido, cada una dura según sus sílabas
-  for (let k = 0; k < conocidos.length - 1; k++) {
-    const [a, ta] = conocidos[k];
-    const [b, tb] = conocidos[k + 1];
-    const base = Math.max(a, 0);
-    const tramo = peso.slice(base, b).reduce((s, x) => s + x, 0);
-    let acum = a < 0 ? 0 : peso[a];
-    for (let i = a + 1; i < b; i++) {
-      t[i] = ta + ((tb - ta) * acum) / tramo;
-      acum += peso[i];
-    }
-  }
-  return t;
-}
-
-// Dibuja la escena actual al ritmo de una voz: 'adulta' (grabación del cuento) o 'propia' (la lectora)
-function reproducirEscena(fuente = 'adulta', { alTerminar = botonesEscena } = {}) {
+// Dibuja la escena actual al ritmo de la voz adulta grabada (o de un ritmo estimado si no hay grabación)
+function reproducirEscena({ alTerminar = botonesEscena } = {}) {
   const { o, ctrl } = cuento;
   const id = ++cuento.reproduccion;
   const spans = [...$vista.querySelectorAll('.parrafo .p')];
@@ -444,52 +375,32 @@ function reproducirEscena(fuente = 'adulta', { alTerminar = botonesEscena } = {}
   };
 
   audioCuento.pause();
-  audioVoz.pause();
   ctrl.reiniciar();
   ctrl.hasta(-1);
   spans.forEach((el) => { el.className = 'p escuchando'; });
-  const m = $vista.querySelector('.mensaje');
-  m.textContent = fuente === 'propia' ? '🎙 Tu lectura' : '';
+  $vista.querySelector('.mensaje').textContent = '';
   if (!cuento.completo) ponerBotones([]);
 
-  // De dónde suena y cuándo empieza cada palabra
-  let audio;
-  let inicios;
-  let desde;
-  let hasta;
-  if (fuente === 'propia' && cuento.voces[cuento.escena]) {
-    const v = cuento.voces[cuento.escena];
-    audio = audioVoz;
-    if (audio.src !== v.url) audio.src = v.url;
-    inicios = completarTiempos(v.tiempos, v.duracion, palabras.slice(o.inicio, o.fin));
-    desde = 0;
-    hasta = v.duracion + 0.3;
-  } else if (tiemposCuento) {
-    audio = audioCuento;
-    const ini = tiemposCuento.inicios;
-    inicios = ini.slice(o.inicio, o.fin);
-    desde = Math.max(0, ini[o.inicio] - 0.15);
-    hasta = o.fin < ini.length ? ini[o.fin] - 0.3 : tiemposCuento.duracion;
-  } else {
-    return ritmoEstimado(0);
-  }
-
-  audio.currentTime = desde;
-  audio.play().catch(() => { /* lo resuelve el control de abajo */ });
+  if (!tiemposCuento) return ritmoEstimado(0);
+  const ini = tiemposCuento.inicios;
+  const desde = Math.max(0, ini[o.inicio] - 0.15);
+  const hasta = o.fin < ini.length ? ini[o.fin] - 0.3 : tiemposCuento.duracion;
+  audioCuento.currentTime = desde;
+  audioCuento.play().catch(() => { /* lo resuelve el control de abajo */ });
   const comienzo = performance.now();
   const tic = () => {
     if (id !== cuento.reproduccion) return;
-    const t = audio.currentTime;
+    const t = audioCuento.currentTime;
     // si el audio no avanza (bloqueado o sin sonido), se sigue sin él
     if (performance.now() - comienzo > 1500 && t < desde + 0.05) {
-      audio.pause();
+      audioCuento.pause();
       return ritmoEstimado(dicha + 1);
     }
     let rel = dicha;
-    while (rel + 1 < n && inicios[rel + 1] <= t) rel++;
+    while (rel + 1 < n && ini[o.inicio + rel + 1] <= t) rel++;
     marcar(rel);
-    if (t >= hasta || audio.ended) {
-      audio.pause();
+    if (t >= hasta || audioCuento.ended) {
+      audioCuento.pause();
       setTimeout(fin, 300);
       return;
     }
@@ -500,16 +411,15 @@ function reproducirEscena(fuente = 'adulta', { alTerminar = botonesEscena } = {}
 
 function botonesEscena() {
   const ultima = cuento.escena >= oracionesTexto.length - 1;
-  const botones = [{ texto: '↺ Ver otra vez', accion: () => reproducirEscena('adulta') }];
-  if (cuento.voces[cuento.escena]) botones.push({ texto: '🎙 Escuchar mi lectura', accion: () => reproducirEscena('propia') });
-  botones.push({ texto: ultima ? 'Ver resultados' : 'Siguiente escena →', primario: true, accion: siguienteEscena });
-  ponerBotones(botones);
+  ponerBotones([
+    { texto: '↺ Ver otra vez', accion: () => reproducirEscena() },
+    { texto: ultima ? 'Ver resultados' : 'Siguiente escena →', primario: true, accion: siguienteEscena },
+  ]);
 }
 
 function siguienteEscena() {
   cuento.reproduccion++;
   audioCuento.pause();
-  audioVoz.pause();
   cuento.escena++;
   if (cuento.escena < oracionesTexto.length) return leerEscena();
   resultados({ estados: cuento.estados, segundos: Math.round(cuento.ms / 1000) });
@@ -520,7 +430,7 @@ function verCuentoCompleto() {
   escucha.detener();
   const def = cuentoDe(texto);
   if (!cuento || cuento.def !== def) {
-    cuento = { def, escena: 0, estados: palabras.map(() => 'pendiente'), ms: 0, reproduccion: 0, voces: [] };
+    cuento = { def, escena: 0, estados: palabras.map(() => 'pendiente'), ms: 0, reproduccion: 0 };
   }
   prepararAudioCuento(def);
   cuento.completo = true;
@@ -532,7 +442,7 @@ function escenaCompleta(k) {
   montarEscena(k, `${escapar(texto.titulo)} · ${k + 1} de ${oracionesTexto.length}`, '', [
     { texto: '■ Detener', accion: finCuentoCompleto },
   ]);
-  reproducirEscena('adulta', {
+  reproducirEscena({
     alTerminar: () => {
       const id = cuento.reproduccion;
       setTimeout(() => {

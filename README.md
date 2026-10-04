@@ -11,9 +11,9 @@ Aplicación web para practicar lectura en voz alta (español de Chile, nivel ~9 
 4. **Leer**: el párrafo completo; cada palabra se pinta verde al leerla (naranja si se saltó). Al final: tiempo, palabras por minuto y palabras para repasar.
 
 **Cuentos animados** (por ahora, «El astronauta curioso»), activados con `cuento: '<id>'` en `js/textos.js`:
-- **Practicar → muro de palabras**: las 5 palabras más difíciles; cada una es un muro de ladrillos-sílaba que el astronauta rompe en 3 lecturas. «🔊 Escuchar» usa la voz adulta grabada.
+- **Practicar → muro de palabras**: hasta 5 palabras difíciles por escena (las marcadas en Mirar), agrupadas escena por escena; cada una es un muro de ladrillos-sílaba que el astronauta rompe en 3 lecturas. «🔊 Escuchar» usa la voz adulta grabada.
 - **Frases → escalera**: cada repetición de la oración materializa un nivel; el astronauta lo recorre al ritmo de la lectura y celebra al final.
-- **Leer → escenas**: una oración a la vez; al terminarla, la escena se dibuja al ritmo de la voz adulta. Si está activado «Grabar mi voz», también se puede ver la escena con **su propia voz** («🎙 Escuchar mi lectura»).
+- **Leer → escenas**: una oración a la vez; al terminarla, la escena se dibuja al ritmo de la voz adulta.
 - **Resultados → «▶ Ver el cuento completo»**: las 5 escenas seguidas con la voz adulta.
 
 Archivos: `js/cuentos/<id>.js` (escenas), `js/cuento.js` (motor de animación), `js/juegos/muro.js` y `js/juegos/escalera.js`, `js/cuento-app.js` (las etapas especiales).
