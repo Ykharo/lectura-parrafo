@@ -405,7 +405,7 @@
           await e.anim(cielo.luna, { y: 640 }, 500, 'entra');
           await Promise.all([e.anim(cielo.sol, { y: 92 }, 700, 'sale'), e.anim(noche, { op: 0 }, 700)]);
         }],
-        [2, () => leo.caminar(470, 2400)],
+        [0, () => leo.caminar(470, 1900)], // camina mientras pasan los días; llega antes de «atrapado»
         [5, async () => {
           leo.detener();
           e.anim(leo.raiz, { x: 470 }, 200);
