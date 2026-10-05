@@ -262,8 +262,9 @@ function inicio() {
     <p class="grande">¿Qué vamos a leer hoy?</p>
     <div class="tarjetas">
       ${textos.map((t) => `
-        <div class="tarjeta" data-id="${escapar(t.id)}">
+        <div class="tarjeta${cuentoDe(t) ? ' animada' : ''}" data-id="${escapar(t.id)}">
           ${t.propio ? `<span class="borrar" data-borrar="${escapar(t.id)}" aria-label="Eliminar">✕</span>` : ''}
+          ${cuentoDe(t) ? '<span class="sello-animado">✦ Con animación</span>' : ''}
           <strong>${escapar(t.titulo)}</strong>
           <span class="vista-previa">${escapar(sinMarcas(t.parrafo).split(/\s+/).slice(0, 9).join(' '))}…</span>
           <span class="meta">${sinMarcas(t.parrafo).split(/\s+/).length} palabras${t.propio ? ' · agregado' : ''}</span>

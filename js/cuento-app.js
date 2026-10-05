@@ -256,12 +256,7 @@ function completarNivel() {
   felicitar();
   const o = oracionesTexto[frases.oracion];
   const ultimoNivel = frases.nivel >= o.bloques.length;
-  if (ultimoNivel) {
-    // el último nivel es la oración completa: cuenta como la lectura de la escena
-    frases.estadosUltimo = frases.estados.slice();
-    frases.msUltimo = frases.t0 ? performance.now() - frases.t0 : 0;
-  }
-  // en el último nivel se deja celebrar al astronauta
+  // en el último nivel se deja celebrar al personaje
   setTimeout(siguienteNivel, ultimoNivel ? 2800 : 1500);
 }
 
@@ -298,11 +293,16 @@ function desbloquearAudio() {
 function nuevoCuento(guiado) {
   cuento = {
     def: cuentoDe(texto), escena: 0, estados: palabras.map(() => 'pendiente'), ms: 0, reproduccion: 0, guiado,
+    fase: guiado ? 'practica' : 'lectura', // practica: muro, bloques y escena con voz adulta · lectura: cuento completo
   };
 }
 
-// ================= Recorrido guiado: escena por escena =================
-// Por cada escena: presentación → palabras difíciles (muro) → bloques (escalera) → lectura con animación.
+// ================= Recorrido guiado =================
+// 1) Práctica, escena por escena: presentación → palabras difíciles (muro) → bloques (escalera)
+//    → la escena animada con la voz adulta.
+// 2) Lectura del cuento completo, escena por escena: la animación avanza con la lectura de la niña
+//    y al terminar cada escena se repite con la voz adulta.
+// 3) Recién entonces se habilita escuchar el cuento completo.
 function empezarGuiado() {
   nuevoCuento(true);
   desbloquearAudio();
@@ -323,8 +323,8 @@ function presentarEscena() {
   pantalla('paso1 presentacion', `
     <p class="titulo">Escena ${k + 1} de ${oracionesTexto.length}</p>
     <p class="indicacion">${difs.length
-      ? `Primero practica ${difs.length === 1 ? 'la palabra' : `las ${difs.length} palabras`} en <b>dorado</b>, luego lee por bloques y al final mira la escena.`
-      : 'Lee por bloques y al final mira la escena.'}</p>
+      ? `Practica ${difs.length === 1 ? 'la palabra' : `las ${difs.length} palabras`} en <b>dorado</b>, luego lee por bloques y al final mira la escena.`
+      : 'Lee por bloques y al final mira la escena.'}${k === oracionesTexto.length - 1 ? ' Después leerás el cuento completo con animación.' : ''}</p>
     <p class="parrafo">${ps}</p>
   `, [{ texto: 'Comenzar', primario: true, accion: () => practicarEscena(difs) }]);
 }
@@ -345,13 +345,9 @@ function practicarEscena(difs) {
   setTimeout(() => { if (cuento && cuento.escena === k && !muroJuego) etapaMuro(difs, bloques); }, 3000);
 }
 
-// Al terminar los bloques ya leyó la oración completa: se pasa directo a la animación con la voz grabada
+// Al terminar los bloques: la escena animada con la voz adulta grabada
 function animarEscena() {
   const k = cuento.escena;
-  const o = oracionesTexto[k];
-  const leidos = frases.estadosUltimo || [];
-  for (let i = o.inicio; i < o.fin; i++) cuento.estados[i] = leidos[i] || 'pendiente';
-  cuento.ms += frases.msUltimo || 0;
   escucha.detener(); // micrófono apagado: la voz grabada suena bien
   ocultarAviso();
   marcarPaso(4);
@@ -359,6 +355,32 @@ function animarEscena() {
   cuento.leyendo = false;
   $vista.querySelectorAll('.parrafo .p').forEach((el) => { el.className = 'p escuchando'; });
   setTimeout(() => { if (cuento && cuento.escena === k && !cuento.leyendo) reproducirEscena(); }, 1200);
+}
+
+// Después de la escena con voz adulta: la práctica de la escena siguiente, o la lectura del cuento completo
+function siguientePractica() {
+  detenerCuento();
+  if (cuento.escena + 1 < oracionesTexto.length) {
+    cuento.escena++;
+    return presentarEscena();
+  }
+  escucha.detener();
+  ocultarAviso();
+  marcarPaso(4);
+  pantalla('centro transicion', `
+    <p class="grande">¡Práctica lista!</p>
+    <p class="sub">Ahora lee el cuento completo, escena por escena. La animación avanza mientras lees, y después escucharás cada escena.</p>
+  `, [{ texto: 'Leer el cuento', primario: true, accion: empezarLecturaCompleta }]);
+}
+
+// Con el toque se enciende el micrófono y se desbloquea el audio (el iPad lo exige)
+function empezarLecturaCompleta() {
+  desbloquearAudio();
+  cuento.fase = 'lectura';
+  cuento.escena = 0;
+  cuento.estados = palabras.map(() => 'pendiente');
+  cuento.ms = 0;
+  leerEscena();
 }
 
 // ================= Leer: escenas animadas =================
@@ -401,6 +423,10 @@ function leerEscena() {
   montarEscena(k, `Escena ${k + 1} de ${oracionesTexto.length}`,
     Reconocedor ? 'Lee la oración en voz alta' : 'Lee la oración y toca «Terminé»',
     [{ texto: 'Terminé', accion: terminarEscena }]);
+  // la animación parte desde su inicio y avanza con cada palabra leída
+  cuento.reproduccion++;
+  cuento.ctrl.reiniciar();
+  cuento.ctrl.hasta(-1);
   const o = cuento.o;
   Object.assign(cuento, { base: cuento.estados.slice(), desde: o.inicio, pos: o.inicio, consumidas: 0, t0: null, leyendo: true });
   escucha.alReiniciar = () => {
@@ -420,6 +446,7 @@ function oirEscena(t) {
   if (r.pos > cuento.o.inicio && !cuento.t0) cuento.t0 = performance.now();
   cuento.pos = r.pos;
   cuento.estados = r.estados;
+  cuento.ctrl.hasta(cuento.pos - cuento.o.inicio - 1); // la escena avanza con la lectura
   pintarEscena();
   if (cuento.pos >= cuento.o.fin) terminarEscena();
 }
@@ -438,9 +465,10 @@ function terminarEscena() {
   escucha.detener(); // micrófono apagado: la voz grabada suena bien y no se cuenta como lectura
   pintarEscena();
   ponerBotones([]);
-  $vista.querySelector('.mensaje').textContent = '';
+  cuento.ctrl.hasta(cuento.o.fin - cuento.o.inicio - 1);
+  $vista.querySelector('.mensaje').textContent = '¡Muy bien! Ahora escucha la escena';
   const k = cuento.escena;
-  setTimeout(() => { if (cuento && cuento.escena === k && !cuento.leyendo) reproducirEscena(); }, 700);
+  setTimeout(() => { if (cuento && cuento.escena === k && !cuento.leyendo) reproducirEscena(); }, 2200);
 }
 
 // Dibuja la escena actual al ritmo de la voz adulta grabada (o de un ritmo estimado si no hay grabación)
@@ -513,9 +541,12 @@ function reproducirEscena({ alTerminar = botonesEscena } = {}) {
 
 function botonesEscena() {
   const ultima = cuento.escena >= oracionesTexto.length - 1;
+  const practicando = cuento.fase === 'practica';
   ponerBotones([
     { texto: '↺ Ver otra vez', accion: () => reproducirEscena() },
-    { texto: ultima ? 'Ver resultados' : 'Siguiente escena →', primario: true, accion: siguienteEscena },
+    practicando
+      ? { texto: ultima ? 'Continuar →' : 'Siguiente escena →', primario: true, accion: siguientePractica }
+      : { texto: ultima ? 'Ver resultados' : 'Siguiente escena →', primario: true, accion: siguienteEscena },
   ]);
 }
 
@@ -523,7 +554,7 @@ function siguienteEscena() {
   cuento.reproduccion++;
   audioCuento.pause();
   cuento.escena++;
-  if (cuento.escena < oracionesTexto.length) return cuento.guiado ? presentarEscena() : leerEscena();
+  if (cuento.escena < oracionesTexto.length) return leerEscena();
   Almacen.marcarLeido(texto.id); // desde ahora se habilitan «Leer con animación» y «Escuchar el cuento»
   resultados({ estados: cuento.estados, segundos: Math.round(cuento.ms / 1000) });
 }

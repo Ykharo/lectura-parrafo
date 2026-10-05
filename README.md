@@ -10,10 +10,11 @@ Aplicación web para practicar lectura en voz alta (español de Chile, nivel ~9 
 3. **Frases**: cada oración se arma de a un bloque con sentido (`[A]`, `[A / B]`, `[A / B / C]`…) y se lee en voz alta en cada paso, hasta leerla completa. Los bloques se calculan solos (puntuación y palabras como *y, que, con, entre…*) o se marcan a mano escribiendo ` / ` en el texto.
 4. **Leer**: el párrafo completo; cada palabra se pinta verde al leerla (naranja si se saltó). Al final: tiempo, palabras por minuto y palabras para repasar.
 
-**Cuentos animados** (por ahora, «El astronauta curioso»), activados con `cuento: '<id>'` en `js/textos.js`. Se recorren **escena por escena** (una escena = una oración):
-1. **Mirar**: el texto completo con las palabras difíciles (hasta 5 por escena) y «Empezar lectura». «Leer con animación» (directo a las escenas) y «▶ Escuchar el cuento» aparecen desactivados hasta que el cuento se lee completo una vez.
-2. Para cada escena: **presentación** (la oración con sus palabras en dorado) → transición «Palabras difíciles: léelas 3 veces» → **muro de palabras** (cada palabra es un muro de ladrillos-sílaba que el astronauta rompe en 3 lecturas; la palabra late mientras espera la lectura) → **bloques** (escalera: cada repetición materializa un nivel; el último nivel es la oración completa y cuenta como su lectura) → **animación** de la escena al ritmo de la voz adulta grabada → escena siguiente.
-3. **Resultados** → «▶ Ver el cuento completo»: las 5 escenas seguidas con la voz adulta.
+**Cuentos animados** («El astronauta curioso», «El rey Midas» y «El león y el ratón»), activados con `cuento: '<id>'` en `js/textos.js`. En el panel principal sus tarjetas son violetas y llevan el sello «✦ Con animación». Se recorren por escenas:
+1. **Mirar**: el texto completo con las palabras difíciles (hasta 5 por escena) y «Empezar lectura». «Leer con animación» (directo a la lectura) y «▶ Escuchar el cuento» aparecen desactivados hasta que el cuento se lee completo una vez.
+2. **Práctica**, para cada escena: **presentación** (la oración con sus palabras en dorado) → transición «Palabras difíciles: léelas 3 veces» → **muro de palabras** (3 lecturas por palabra; la palabra late mientras espera) → **bloques** (escalera: cada repetición materializa un nivel) → la **escena animada con la voz adulta** grabada → escena siguiente (en la última escena, «Continuar →»).
+3. **Lectura del cuento completo** («¡Práctica lista!» → «Leer el cuento»), escena por escena: la animación avanza con cada palabra que la niña lee. Al terminar la escena, se repite con la voz adulta grabada; luego «Siguiente escena →».
+4. **Resultados** (de la lectura completa) → «▶ Ver el cuento completo»: todas las escenas seguidas con la voz adulta.
 
 Si el micrófono no capta una palabra en el muro, un adulto puede tocar la escena para contarla como leída.
 
