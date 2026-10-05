@@ -1,0 +1,74 @@
+{
+  "oreja-1": [
+    85,
+    85
+  ],
+  "oreja-2": [
+    82,
+    86
+  ],
+  "torso": [
+    350,
+    217
+  ],
+  "melena": [
+    291,
+    299
+  ],
+  "cola-base": [
+    307,
+    86
+  ],
+  "cola-punta": [
+    273,
+    147
+  ],
+  "pata-trasera": [
+    126,
+    228
+  ],
+  "pata-delantera": [
+    119,
+    223
+  ],
+  "pata-delantera-2": [
+    155,
+    217
+  ],
+  "pata-delantera-3": [
+    117,
+    225
+  ],
+  "pata-trasera-2": [
+    120,
+    224
+  ],
+  "pata-grande": [
+    194,
+    217
+  ],
+  "cara-dormido": [
+    216,
+    203
+  ],
+  "cara-sorprendido": [
+    213,
+    201
+  ],
+  "cara-rugiendo": [
+    220,
+    211
+  ],
+  "cara-riendo": [
+    215,
+    209
+  ],
+  "cara-triste": [
+    212,
+    203
+  ],
+  "cara-amable": [
+    212,
+    201
+  ]
+}

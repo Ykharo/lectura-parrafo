@@ -217,6 +217,13 @@ main {
 @keyframes latido-griego { 0%, 100% { fill: #1E1410; } 50% { fill: #FFF3D6; } }
 .griego .fantasma rect { fill: none; stroke: #1E1410; stroke-width: 2; stroke-dasharray: 7 7; }
 /* escenas de jarrón: las figuras aparecen, el oro se enciende */
+/* stop motion de papel: el diorama con esquinas suaves, como una caja de cartón iluminada */
+.papel.juego svg { width: auto; max-width: 100%; margin-left: auto; margin-right: auto; border-radius: 14px; background: #CFE4EA; }
+.papel.juego-muro svg { max-height: 30vh; }
+/* las sílabas de la cuerda laten mientras el ratón espera */
+.papel svg.esperando .silaba-papel { animation: latido-papel 1.1s ease-in-out infinite; }
+@keyframes latido-papel { 0%, 100% { fill: #3a2410; } 50% { fill: #D9534F; } }
+.escena-papel svg { width: auto; max-width: 100%; margin-left: auto; margin-right: auto; border-radius: 14px; background: #CFE4EA; }
 .escena-griega .surge { opacity: 0; transform: translateY(8px); transition: opacity .8s ease, transform .8s ease; }
 .escena-griega .surge.on { opacity: 1; transform: none; }
 .escena-griega .dora { transition: fill 1.1s ease; }

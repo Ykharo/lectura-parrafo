@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plantillas · El león y el ratón</title>
+<style>
+  @page { size: A4; margin: 0; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #e8e4dc; font-family: 'Trebuchet MS', Arial, sans-serif; color: #3a2a1a; }
+  .barra { position: sticky; top: 0; z-index: 2; display: flex; gap: 10px; align-items: center; justify-content: center;
+           padding: 10px; background: #3a2a1a; color: #f3e7d3; font-size: 14px; }
+  .barra button { font: inherit; padding: 8px 16px; border-radius: 999px; border: 0; cursor: pointer; background: #f3e7d3; color: #3a2a1a; }
+  .hoja { width: 210mm; height: 297mm; margin: 12px auto; padding: 10mm 12mm; background: #fff;
+          box-shadow: 0 2px 10px rgba(0,0,0,.2); position: relative; overflow: hidden; page-break-after: always; break-after: page; }
+  .hoja h1 { margin: 0 0 2mm; font-size: 20pt; }
+  .hoja h2 { margin: 0 0 1mm; font-size: 14pt; }
+  .hoja p, .hoja li { font-size: 10.5pt; line-height: 1.45; }
+  .hoja .nota { font-size: 9pt; color: #7a6a5a; margin: 0 0 3mm; }
+  .hoja svg { display: block; width: 186mm; height: 255mm; }
+  .hoja.texto svg { height: auto; }
+  /* piezas: contorno para recortar; en pantalla se puede ver la versión con color de referencia */
+  .p { fill: #fff; stroke: #6b3a1a; stroke-width: 0.9; stroke-linejoin: round; }
+  .l { fill: none; stroke: #6b3a1a; stroke-width: 0.7; stroke-linecap: round; stroke-linejoin: round; }
+  .n { fill: #fff; stroke: #6b3a1a; stroke-width: 0.6; }
+  .pin { fill: none; stroke: #9a8a7a; stroke-width: 0.35; }
+  .et { font-size: 3.2px; fill: #9a8a7a; font-family: Arial, sans-serif; text-anchor: middle; }
+  .color .p, .color .n { fill: var(--c, #fff); }
+  .color .n { fill: var(--c, #222); }
+  @media print {
+    body { background: #fff; }
+    .barra { display: none; }
+    .hoja { margin: 0; box-shadow: none; }
+  }
+</style>
+</head>
+<body>
+<div class="barra">
+  <span>Plantillas para pintar y recortar</span>
+  <button onclick="document.body.classList.toggle('color')">Ver / ocultar colores de referencia</button>
+  <button onclick="window.print()">Imprimir</button>
+</div>
+
+<!-- ============ Hoja 1: instrucciones ============ -->
+<section class="hoja texto">
+  <h1>El león y el ratón · plantillas</h1>
+  <p class="nota">Para la animación tipo stop motion de papel recortado. El cuerpo del león se imprime de la plantilla de ESL Vault (<i>paper-lion-craft-printable-2.pdf</i>, versión para pintar).</p>
+  <h2>Qué imprimir</h2>
+  <ul>
+    <li><b>León:</b> la plantilla de ESL Vault (cuerpo, melena, cara, orejas, patas, cola) + la <b>hoja 2</b> de este archivo (caras con expresiones y pata grande).</li>
+    <li><b>Ratón:</b> hoja 3.</li>
+    <li><b>Objetos del cuento:</b> hoja 4 (árbol, sol, luna, flores, piedras, cuerda, «Z»).</li>
+  </ul>
+  <p>Imprime en <b>papel grueso</b> (cartulina blanca o papel de 160–200 g) para que no se arrugue al pintar.</p>
+  <h2>Pintar</h2>
+  <ul>
+    <li>Acuarela, témpera o lápices; que se noten las <b>pinceladas y la textura</b> (ese es el encanto del papel pintado a mano).</li>
+    <li>Colores sugeridos: león en <b>amarillo ocre</b>, melena <b>naranjo-café</b>; ratón <b>gris claro</b> con orejas, manos, pies, nariz y cola <b>rosados</b>. Botón «Ver colores de referencia» arriba (solo en pantalla).</li>
+    <li>Los ojos, narices y bocas se pueden pintar directamente sobre las caras (no hace falta recortarlos aparte).</li>
+  </ul>
+  <h2>Recortar</h2>
+  <ul>
+    <li>Recorta <b>por fuera de la línea</b>, dejando un borde blanco delgado (1–2 mm) alrededor de cada pieza.</li>
+    <li>Las marcas <b>⊕</b> indican dónde irían los encuadernadores: <b>no hace falta perforar ni armar</b>; las piezas se articulan en la animación.</li>
+  </ul>
+  <h2>Fotografiar (o escanear)</h2>
+  <ul>
+    <li>Lo ideal es un <b>escáner</b>. Si no, una foto con el celular <b>desde arriba</b>, bien paralelo a la mesa, con <b>luz de día</b> y sin sombras fuertes.</li>
+    <li>Pon las piezas sobre una hoja <b>blanca lisa</b>, <b>separadas entre sí</b> (que no se toquen), todas a la vez si caben.</li>
+    <li>Tres fotos: <b>leon.jpg</b> (todas las piezas del león), <b>raton.jpg</b> y <b>objetos.jpg</b>, en la mayor resolución del celular.</li>
+    <li>Guárdalas en <b>assets/leon-raton/</b>. Las piezas se separan y se articulan automáticamente.</li>
+  </ul>
+</section>
+
+<!-- ============ Hoja 2: león, caras y pata ============ -->
+<section class="hoja">
+  <h2>León · caras con expresiones y pata grande</h2>
+  <p class="nota">Mismo tamaño que la cara de la plantilla del león. Píntalas y recórtalas como las demás piezas.</p>
+  <svg viewBox="0 0 186 255" id="hoja-leon"></svg>
+</section>
+
+<!-- ============ Hoja 3: ratón ============ -->
+<section class="hoja">
+  <h2>Ratón · piezas</h2>
+  <p class="nota">Cuerpo, cabezas con expresiones, orejas, brazos, piernas, cola en tres partes y manos juntas (suplicando).</p>
+  <svg viewBox="0 0 186 255" id="hoja-raton"></svg>
+</section>
+
+<!-- ============ Hoja 4: objetos ============ -->
+<section class="hoja">
+  <h2>Objetos del cuento</h2>
+  <p class="nota">Árbol (copa y tronco), sol, luna, nube, flores, hojas, piedras para la escalera, cuerda y «Z» para dormir. La red la dibuja la app.</p>
+  <svg viewBox="0 0 186 255" id="hoja-objetos"></svg>
+</section>
+
+<script>
+  // Dibujo de las piezas (unidades en milímetros)
+  const P = (d, c, t = '') => `<path class="p" d="${d}" style="--c:${c}" ${t}/>`;
+  const L = (d) => `<path class="l" d="${d}"/>`;
+  const N = (d, c = '#222') => `<path class="n" d="${d}" style="--c:${c}"/>`;
+  const circ = (cx, cy, r) => `M${cx - r},${cy} a${r},${r} 0 1,0 ${2 * r},0 a${r},${r} 0 1,0 ${-2 * r},0 Z`;
+  const pin = (x, y) => `<circle class="pin" cx="${x}" cy="${y}" r="1.6"/><path class="pin" d="M${x - 2.4},${y} H${x + 2.4} M${x},${y - 2.4} V${y + 2.4}"/>`;
+  const etiqueta = (x, y, t) => `<text class="et" x="${x}" y="${y}">${t}</text>`;
+  const g = (x, y, s, contenido) => `<g transform="translate(${x} ${y}) scale(${s})">${contenido}</g>`;
+
+  const AMARILLO = '#F5B000', NARANJO = '#C4661A', CREMA = '#FFF7EA', ROSA = '#EBA0A0', GRIS = '#BDB4AA', GRIS2 = '#A49A8F';
+
+  // ---------- León: cara base (como la de la plantilla) ----------
+  const CARA = 'M-36,-6 C-37,-34 -18,-38 0,-38 C18,-38 37,-34 36,-6 C36,24 24,34 0,34 C-24,34 -36,24 -36,-6 Z';
+  const HOCICO = 'M-24,14 C-24,2 24,2 24,14 C24,26 -24,26 -24,14 Z';
+  const NARIZ = 'M-6,6 C-6,2 6,2 6,6 C5,9 2,11 0,12 C-2,11 -5,9 -6,6 Z';
+  const cara = (rasgos) => P(CARA, AMARILLO) + P(HOCICO, CREMA) + N(NARIZ) + rasgos;
+  const ojo = (x, y, r = 3.4) => N(circ(x, y, r));
+  const CARAS = [
+    ['dormido', L('M-20,-8 q6,5 12,0 M8,-8 q6,5 12,0') + L('M-5,17 q5,4 10,0')],
+    ['sorprendido', ojo(-13, -8, 4) + ojo(13, -8, 4) + L('M-17,-17 q4,-3 8,0 M9,-17 q4,-3 8,0') + N(circ(0, 20, 3.4), '#7a2a2a')],
+    ['rugiendo', ojo(-13, -7) + ojo(13, -7) + L('M-19,-15 l10,4 M19,-15 l-10,4') +
+      N('M-14,13 Q0,36 14,13 Z', '#8a2a2a') + `<path class="n" style="--c:#fff" d="M-10,13 l3,5 l3,-5 Z M4,13 l3,5 l3,-5 Z"/>`],
+    ['riendo', L('M-20,-6 q6,-6 12,0 M8,-6 q6,-6 12,0') + N('M-13,13 Q0,32 13,13 Z', '#8a2a2a')],
+    ['triste', ojo(-13, -6) + ojo(13, -6) + L('M-19,-13 l9,-3 M19,-13 l-9,-3') + L('M-7,23 q7,-5 14,0') +
+      `<path class="n" style="--c:#9ad0f0" d="M-15,-1 q-2,4 0,6 q2,-2 0,-6 Z"/>`],
+  ];
+  // pata grande vista desde arriba (para atrapar al ratón): palma + 4 dedos
+  const PATA = P('M-24,6 C-26,-12 -12,-18 0,-18 C12,-18 26,-12 24,6 C22,22 10,26 0,26 C-10,26 -22,22 -24,6 Z', AMARILLO) +
+    [[-17, -18], [-6, -24], [6, -24], [17, -18]].map(([x, y]) => P(circ(x, y, 7.5), AMARILLO)).join('') +
+    P('M-12,6 C-12,-2 12,-2 12,6 C12,14 -12,16 -12,6 Z', CREMA) +
+    [[-17, -19], [-6, -25], [6, -25], [17, -19]].map(([x, y]) => P(circ(x, y, 3.2), CREMA)).join('');
+
+  let leon = '';
+  CARAS.forEach(([nombre, rasgos], k) => {
+    const x = 46 + (k % 2) * 94, y = 42 + Math.floor(k / 2) * 84;
+    leon += g(x, y, 1.0, cara(rasgos)) + etiqueta(x, y + 40, nombre);
+  });
+  leon += g(140, 214, 1.1, PATA) + etiqueta(140, 250, 'pata grande');
+  document.getElementById('hoja-leon').innerHTML = leon;
+
+  // ---------- Ratón ----------
+  const CUERPO = 'M-34,10 C-36,-16 -14,-30 8,-26 C30,-22 40,-4 36,12 C32,30 -30,34 -34,10 Z';
+  const CABEZA = 'M-20,-2 C-22,-22 0,-27 13,-16 L31,-1 C34,2 32,7 27,7 L9,13 C-8,20 -20,14 -20,-2 Z';
+  const cabezaRaton = (rasgos) => P(CABEZA, GRIS) + N(circ(29, 2, 3.4), ROSA) + rasgos;
+  const ojoR = (r = 3.6) => N(circ(6, -7, r));
+  const CABEZAS = [
+    ['neutral', ojoR() + L('M14,8 q4,3 8,1')],
+    ['asustado', ojoR(4.6) + L('M1,-15 l9,-2') + L('M14,9 q4,-2 8,0') + `<path class="n" style="--c:#9ad0f0" d="M4,0 q-2,4 0,6 q2,-2 0,-6 Z"/>`],
+    ['feliz', L('M2,-7 q4,-5 8,0') + N('M12,6 q6,7 12,0 Z', '#8a2a2a')],
+    ['royendo', ojoR() + `<path class="n" style="--c:#fff" d="M20,8 h4 v5 h-4 Z M24,8 h4 v5 h-4 Z"/>` + L('M-4,4 q-3,4 0,8')],
+  ];
+  const OREJA = P(circ(0, 0, 15), GRIS) + P(circ(0, 1, 9), ROSA);
+  const BRAZO = P('M-4.5,-14 C-4.5,-19 4.5,-19 4.5,-14 L4,10 C4,13 -4,13 -4,10 Z', GRIS) + P(circ(0, 14, 4.6), ROSA);
+  const PIERNA = P('M-7,-14 C-7,-20 7,-20 7,-12 L6,6 L18,8 C22,9 22,15 16,15 L-3,15 C-8,15 -8,4 -7,-14 Z', GRIS) +
+    P('M5,7 L18,8 C22,9 22,15 16,15 L5,15 Z', ROSA);
+  const COLA = (largo, grosor) => P(`M0,-${grosor} Q${largo / 2},-${grosor + 6} ${largo},-${grosor * 0.5} L${largo},${grosor * 0.5} Q${largo / 2},${6 - grosor} 0,${grosor} Z`, ROSA);
+  const MANOS = P('M-10,0 C-10,-12 2,-14 4,-2 C6,10 -10,12 -10,0 Z', ROSA) + P('M-2,2 C-2,-10 10,-12 12,0 C14,12 -2,14 -2,2 Z', ROSA);
+
+  let raton = '';
+  // cuerpo con marcas: cuello (cabeza), hombro (brazos), cadera (piernas) y cola
+  raton += g(46, 44, 1.1, P(CUERPO, GRIS)) + pin(78, 30) + pin(66, 44) + pin(40, 62) + pin(14, 48) + etiqueta(46, 86, 'cuerpo');
+  CABEZAS.forEach(([nombre, rasgos], k) => {
+    const x = 112 + (k % 2) * 46, y = 28 + Math.floor(k / 2) * 46;
+    raton += g(x, y, 0.8, cabezaRaton(rasgos)) + etiqueta(x + 5, y + 20, nombre);
+  });
+  raton += g(26, 128, 0.95, OREJA) + g(62, 128, 0.95, OREJA) + etiqueta(44, 150, 'orejas');
+  raton += g(96, 128, 1.2, BRAZO) + g(114, 128, 1.2, BRAZO) + pin(96, 112) + pin(114, 112) + etiqueta(105, 155, 'brazos');
+  raton += g(146, 130, 1.1, PIERNA) + pin(146, 113) + g(146, 172, 1.1, PIERNA) + pin(146, 155) + etiqueta(160, 196, 'piernas');
+  raton += g(12, 182, 1, COLA(44, 4)) + g(12, 202, 1, COLA(38, 3)) + g(12, 220, 1, COLA(32, 2)) +
+    pin(14, 182) + etiqueta(36, 232, 'cola (3 partes)');
+  raton += g(96, 196, 1.3, MANOS) + etiqueta(99, 220, 'manos juntas');
+  document.getElementById('hoja-raton').innerHTML = raton;
+
+  // ---------- Objetos ----------
+  const VERDE = '#7FA35A', VERDE2 = '#5E8A45', CAFE = '#8A5A35', CIELO = '#BFE0F2', PIEDRA = '#B9AE9E', OCRE = '#D9B577';
+  const COPA = P('M-60,10 C-70,-6 -54,-24 -36,-20 C-30,-36 -8,-38 0,-26 C10,-40 34,-36 38,-20 C58,-26 72,-6 60,10 C56,20 -54,22 -60,10 Z', VERDE);
+  const TRONCO = P('M-8,40 L-6,0 L-22,-22 L-16,-24 L-2,-8 L0,-30 L6,-30 L6,-8 L20,-24 L25,-20 L8,2 L10,40 Z', CAFE);
+  const SOL = [...Array(12)].map((_, k) => {
+    const a = (k * Math.PI) / 6, b = a + 0.18, c = a - 0.18;
+    return P(`M${(Math.cos(c) * 17).toFixed(1)},${(Math.sin(c) * 17).toFixed(1)} L${(Math.cos(a) * 27).toFixed(1)},${(Math.sin(a) * 27).toFixed(1)} L${(Math.cos(b) * 17).toFixed(1)},${(Math.sin(b) * 17).toFixed(1)} Z`, '#F5B000');
+  }).join('') + P(circ(0, 0, 18), '#F7C531') + L('M-7,-3 q2,-2 4,0 M3,-3 q2,-2 4,0 M-6,5 q6,5 12,0');
+  const LUNA = P('M6,-22 C-14,-22 -22,-4 -14,10 C-6,24 14,24 20,14 C6,16 -6,6 -4,-6 C-2,-16 6,-20 6,-22 Z', '#F3E3A0') + L('M-8,0 q2,2 4,0');
+  const NUBE = P('M-30,8 C-36,-2 -26,-12 -16,-8 C-12,-20 8,-20 10,-8 C22,-14 34,-4 28,8 C26,14 -26,14 -30,8 Z', '#fff');
+  const FLOR = (c) => [0, 72, 144, 216, 288].map((a) => {
+    const r = (a * Math.PI) / 180;
+    return P(circ(+(Math.cos(r) * 7).toFixed(1), +(Math.sin(r) * 7).toFixed(1), 5.5), c);
+  }).join('') + P(circ(0, 0, 4.5), '#F7C531');
+  const HOJA = P('M-14,0 C-8,-9 8,-9 14,0 C8,9 -8,9 -14,0 Z', VERDE2) + L('M-12,0 H12');
+  const PIEDRA_R = (w, h) => P(`M${-w / 2 + 5},${-h / 2} H${w / 2 - 5} Q${w / 2},${-h / 2} ${w / 2},${-h / 2 + 5} V${h / 2 - 5} Q${w / 2},${h / 2} ${w / 2 - 5},${h / 2} H${-w / 2 + 5} Q${-w / 2},${h / 2} ${-w / 2},${h / 2 - 5} V${-h / 2 + 5} Q${-w / 2},${-h / 2} ${-w / 2 + 5},${-h / 2} Z`, PIEDRA);
+  const CUERDA = P('M0,-4 H150 Q154,0 150,4 H0 Q-4,0 0,-4 Z', OCRE) + L([...Array(30)].map((_, k) => `M${3 + k * 5},-4 l3,8`).join(' '));
+  const ZETA = P('M-8,-10 H8 V-6 L-2,6 H8 V10 H-8 V6 L2,-6 H-8 Z', '#fff');
+
+  let obj = '';
+  obj += g(70, 44, 1, COPA) + etiqueta(70, 72, 'copa del árbol');
+  obj += g(158, 44, 1, TRONCO) + etiqueta(158, 92, 'tronco');
+  obj += g(32, 108, 1, SOL) + etiqueta(32, 140, 'sol');
+  obj += g(80, 108, 1, LUNA) + etiqueta(82, 140, 'luna');
+  obj += g(140, 112, 1, NUBE) + etiqueta(140, 130, 'nube');
+  obj += g(20, 158, 1, FLOR('#E36F5A')) + g(46, 158, 1, FLOR('#F2A7C3')) + g(72, 158, 1, FLOR('#9DB7E8')) + etiqueta(46, 175, 'flores');
+  obj += g(100, 154, 1, HOJA) + g(132, 154, 1, HOJA) + g(116, 168, 1, HOJA) + etiqueta(116, 180, 'hojas');
+  obj += g(170, 154, 1, ZETA) + g(176, 174, 0.6, ZETA) + g(160, 172, 0.45, ZETA) + etiqueta(170, 186, '«Z»');
+  obj += g(30, 196, 1, PIEDRA_R(44, 16)) + g(80, 196, 1, PIEDRA_R(40, 16)) + g(128, 196, 1, PIEDRA_R(46, 16)) + g(170, 196, 1, PIEDRA_R(26, 16)) + etiqueta(93, 212, 'piedras');
+  obj += g(18, 234, 1, CUERDA) + etiqueta(93, 248, 'cuerda');
+  document.getElementById('hoja-objetos').innerHTML = obj;
+</script>
+</body>
+</html>

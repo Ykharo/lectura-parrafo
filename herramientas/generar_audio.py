@@ -7,6 +7,7 @@
 # Uso (desde la carpeta del proyecto):
 #   python herramientas/generar_audio.py midas
 #   python herramientas/generar_audio.py astronauta
+#   python herramientas/generar_audio.py leon-raton
 # Guarda assets/audio/<id>.wav. Después, para los tiempos de cada palabra:
 #   node herramientas/sincronizar.js <id> assets/audio/<id>.wav
 #
@@ -35,6 +36,14 @@ TEXTOS = {
         "Tenía mucha hambre y mucha sed, y comenzó a llorar. Entonces le rogó a Dioniso que le quitara ese poder. "
         "El dios le dijo que se lavara en el río, y así lo hizo. Desde ese día, Midas prefirió una mesa con comida "
         "antes que un palacio de oro."
+    ),
+    "leon-raton": (
+        "Un león dormía tranquilamente bajo la sombra de un árbol. De pronto, un pequeño ratón pasó corriendo "
+        "sobre su cuerpo. El león despertó y lo atrapó con una de sus enormes patas. —¡Por favor, déjame ir! "
+        "—suplicó el ratón—. Algún día podría ayudarte. El león se rio, pero decidió dejarlo libre. "
+        "Días después, el león quedó atrapado en una red. Intentó escapar, pero no pudo. Al escuchar sus rugidos, "
+        "el ratón llegó rápidamente y comenzó a roer las cuerdas. Poco después, el león quedó libre. "
+        "Nadie es tan pequeño que no pueda ayudar a los demás."
     ),
 }
 VOZ = "Sami"

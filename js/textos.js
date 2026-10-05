@@ -44,13 +44,16 @@ window.TEXTOS = [
       'encuentra uno, / lo mira con cariño / y nunca lo arranca.',
   },
   {
-    id: 'empanadas',
-    titulo: 'Las empanadas de la abuela',
+    id: 'leon-raton',
+    titulo: 'El león y el ratón',
+    cuento: 'leon-raton', // escenas en stop motion de papel en js/cuentos/leon-raton.js
     parrafo:
-      'Para las Fiestas Patrias, la abuela Rosa prepara empanadas de pino. Primero amasa con sus manos ' +
-      'fuertes y luego pica la cebolla, la carne y los huevos. Martina la ayuda a poner una aceituna dentro ' +
-      'de cada empanada. Cuando salen del horno, toda la casa huele delicioso. La familia se sienta junta ' +
-      'a la mesa y celebra con alegría.',
+      'Un león dormía tranquilamente bajo la sombra de un árbol. De pronto, un pequeño ratón pasó corriendo ' +
+      'sobre su cuerpo. El león despertó y lo atrapó con una de sus enormes patas. —¡Por favor, déjame ir! ' +
+      '—suplicó el ratón—. Algún día podría ayudarte. El león se rio, pero decidió dejarlo libre. ' +
+      'Días después, el león quedó atrapado en una red. Intentó escapar, pero no pudo. Al escuchar sus rugidos, ' +
+      'el ratón llegó rápidamente y comenzó a roer las cuerdas. Poco después, el león quedó libre. ' +
+      'Nadie es tan pequeño que no pueda ayudar a los demás.',
   },
   {
     id: 'astronauta',

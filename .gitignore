@@ -48,6 +48,9 @@ fuentes/
 *.mov
 *.zip
 
+# ---- Plantillas de terceros (ESL Vault): uso personal, no se redistribuyen ----
+Antecedentes/plantillas/*.pdf
+
 # ---- Respaldos exportados desde la app (contienen el historial de la niña) ----
 lectura-respaldo-*.json
 

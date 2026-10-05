@@ -25,6 +25,14 @@ Archivos: `js/cuentos/<id>.js` (escenas), `js/cuento.js` (motor de animación), 
 - Escalera: bloques de piedra y los cinco hoplitas en formación, que se sientan y saltan cada nivel (`js/juegos/escalera-griega.js`).
 - Escenas: figuras negras con incisiones crema; el oro se enciende al nombrarse (flores, silla, piedras, pan, uvas) y desaparece de las manos al lavarse en el río.
 
+**«El león y el ratón»** usa el mismo esquema con escenas en **stop motion de papel recortado**:
+- 12 oraciones en **5 escenas** (`grupos` en `js/cuentos/leon-raton.js`).
+- Practicar → **cuerda** (`js/juegos/muro-cuerda.js`): la palabra cuelga en etiquetas-sílaba de una cuerda. Cada lectura es un mordisco del ratón (marcado con un quesito). Al tercero la cuerda se corta y las sílabas se juntan en la palabra. En la última palabra de cada escena, el león se ríe.
+- Frases → **escalera de piedras** (`js/juegos/escalera-piedras.js`): cada bloque leído deja caer una piedra de papel en su nivel, y el ratón baja la escalera. Al final celebra con papel picado.
+- Motor `js/papel.js`: cada escena es un pequeño guion por palabra. La imagen avanza a 12 cuadros por segundo con un leve temblor de mano, y las piezas tienen textura de papel, borde de tijera con filo blanco y sombra de diorama.
+- El león está articulado con las piezas recortadas de una ilustración (`assets/leon-raton/leon/`): torso, melena, 4 patas, cola en dos partes, pata grande y 6 caras que se reemplazan (dormido, sorprendido, rugiendo, riendo, triste y amable). El ratón, la sabana, la acacia, la red, las flores y los efectos se recortan por código.
+- `herramientas/recortar.html` + `recortar.js`: separan las piezas de una lámina con fondo claro en PNG transparentes (se ejecutan en el navegador).
+
 El **historial** guarda cada lectura en el iPad. Desde ahí se puede exportar o importar un respaldo (`.json`).
 
 ## Estructura
@@ -36,6 +44,7 @@ js/analisis.js     sílabas, puntaje de dificultad, comparación de palabras
 js/almacen.js      textos propios, palabras difíciles e historial (localStorage)
 js/textos.js       textos incluidos — agrega más aquí
 js/app.js          pantallas, etapas y reconocimiento de voz (configuración al inicio)
+js/papel.js        motor de stop motion de papel recortado
 assets/            imágenes, sonidos y animaciones livianas (futuro)
 ```
 
